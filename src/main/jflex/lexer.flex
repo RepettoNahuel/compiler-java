@@ -158,56 +158,53 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
   /* Identificadores */
   {Identifier}                  { return symbol(ParserSym.IDENTIFIER, yytext()); }  // Devuelve el texto completo del identificador, ejemplo: "variable1"
     
-  /* Constantes */
-  {IntegerConstant}                        { return symbol(ParserSym.INTEGER_CONSTANT, yytext()); }
+  /* Constantes */  
+  {IntegerConstant}             {
+                                  String value = yytext();
+                                  try {
+                                      short val = Short.parseShort(value);          // Verifica que esté en el rango de 16 bits
+                                  } catch (NumberFormatException e) {
+                                      throw new InvalidIntegerException("Constante entera inválida o fuera de rango: " + value);
+                                  }
 
+                                  SymbolTableGenerator.insertNonStringConstant("_" + value, "CTE_INTEGER", value);
+                                  return symbol(ParserSym.INTEGER_CONSTANT, value);
+                                }
 
-  {IntegerConstant}                       {
-                                            String value = yytext();
-                                            try {
-                                                short val = Short.parseShort(value);  // Verifica que esté en el rango de 16 bits
-                                            } catch (NumberFormatException e) {
-                                                throw new InvalidIntegerException("Constante entera inválida o fuera de rango: " + value);
-                                            }
+  {FloatConstant}               {
+                                  String value = yytext();
+                                  try {
+                                      float f = Float.parseFloat(value);    // Verifica que esté en el rango de 32 bits
+                                      if (Float.isNaN(f) || Float.isInfinite(f)) {
+                                        throw new NumberFormatException("Constante float inválida o fuera de rango: " + value);
+                                      }
+                                  } catch (NumberFormatException e) {
+                                      throw new InvalidFloatException("Constante float inválida o fuera de rango: " + value);
+                                  }
 
-                                            SymbolTableGenerator.insertNonStringConstant("_" + value, "CTE_INTEGER", value);
-                                            return symbol(ParserSym.INTEGER_CONSTANT, value);
-                                          }
+                                  SymbolTableGenerator.insertNonStringConstant("_" + value, "CTE_FLOAT", value);
+                                  return symbol(ParserSym.FLOAT_CONSTANT, value);
+                                }
 
-  {FloatConstant}                         {
-                                            String value = yytext();
-                                            try {
-                                                float f = Float.parseFloat(value);    // Verifica que esté en el rango de 32 bits
-                                                if (Float.isNaN(f) || Float.isInfinite(f)) {
-                                                    throw new NumberFormatException("Constante float inválida o fuera de rango: " + value);
-                                                }
-                                            } catch (NumberFormatException e) {
-                                                throw new InvalidFloatException("Constante float inválida o fuera de rango: " + value);
-                                            }
+  {StringConstant}              {
+                                  String contenido = yytext();
+                                  int longitud = contenido.length() - 2; // excluye las comillas
 
-                                            SymbolTableGenerator.insertNonStringConstant("_" + value, "CTE_FLOAT", value);
-                                            return symbol(ParserSym.FLOAT_CONSTANT, value);
-                                        }
+                                  if (longitud > STRING_MAX_LENGTH) {
+                                      throw new InvalidLengthException("String demasiado largo: " + contenido);
+                                  }
 
-  {StringConstant}                      {
-                                            String contenido = yytext();
-                                            int longitud = contenido.length() - 2; // excluye las comillas
-
-                                            if (longitud > STRING_MAX_LENGTH) {
-                                                throw new InvalidLengthException("String demasiado largo: " + contenido);
-                                            }
-
-                                            String generatedName = "_stringConstant" + stringNbr++;
-                                            SymbolTableGenerator.insertStringConstant(generatedName, "CTE_STRING", contenido, longitud);
-                                            return symbol(ParserSym.STRING_CONSTANT, generatedName);
-                                        }
+                                  String generatedName = "_stringConstant" + stringNbr++;
+                                  SymbolTableGenerator.insertStringConstant(generatedName, "CTE_STRING", contenido, longitud);
+                                  return symbol(ParserSym.STRING_CONSTANT, generatedName);
+                               }
 
   /* whitespace */
-  {WhiteSpace}                   { /* ignore */ }
+  {WhiteSpace}                 { /* ignore */ }
 
   /* Comentarios */
-  {Comment}                      { /* ignore */ }
+  {Comment}                    { /* ignore */ }
 }
 
 /* error fallback */
-[^]                              { throw new UnknownCharacterException(yytext()); }
+[^]                            { throw new UnknownCharacterException(yytext()); }
