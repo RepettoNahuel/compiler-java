@@ -63,7 +63,7 @@ terminal String STRING_CONSTANT;
 terminal String IDENTIFIER;
 
 
-/*** Elementos No Terminales ***/
+/*** Elementos No Terminales ***/                /****************************** SEGUIR DE ACA PARA ABAJO ******************************/
 non terminal sentence;
 non terminal assignment;
 non terminal expression;
