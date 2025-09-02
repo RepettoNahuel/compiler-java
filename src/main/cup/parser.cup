@@ -5,18 +5,65 @@ import java_cup.runtime.*;
 class Parser;
 
 
-// Terminals
-terminal ASSIG;
+/*** Elementos Terminales ***/
+
+//Operadores aritméticos
 terminal PLUS;
 terminal SUB;
 terminal MULT;
 terminal DIV;
+
+//Operador de asignación
+terminal ASSIG;
+
+//Operadores relacionales
+terminal EQUAL;
+terminal NOT_EQUAL;
+terminal LESS_EQUAL;
+terminal GREATER_EQUAL;
+terminal LESS;
+terminal GREATER;
+
+//Operadores lógicos
+terminal AND;
+terminal OR;
+terminal NOT;
+
+//Delimitadores 
 terminal OPEN_BRACKET;
 terminal CLOSE_BRACKET;
-terminal INTEGER_CONSTANT;
-terminal IDENTIFIER;
+terminal OPEN_CURLY_BRACKET;
+terminal CLOSE_CURLY_BRACKET;
+terminal OPEN_SQUARE_BRACKET;
+terminal CLOSE_SQUARE_BRACKET;
+terminal COMMA;
+terminal COLON;
 
-// Non Terminals
+//Palabras clave
+terminal WHILE;
+terminal IF;
+terminal ELSE;
+terminal INIT;
+terminal TYPE_INT;
+terminal TYPE_FLOAT;
+terminal TYPE_STRING;
+terminal READ;
+terminal WRITE;
+
+//Funciones especiales del lenguaje
+terminal EQUAL_EXPRESSIONS_FUNCTION;
+terminal TRIANGLE_AREA_MAXIMUM_FUNCTION;
+
+//Constantes  
+terminal String INTEGER_CONSTANT;
+terminal String FLOAT_CONSTANT;
+terminal String STRING_CONSTANT;
+
+//Identificadores
+terminal String IDENTIFIER;
+
+
+/*** Elementos No Terminales ***/
 non terminal sentence;
 non terminal assignment;
 non terminal expression;
