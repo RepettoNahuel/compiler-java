@@ -156,7 +156,18 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
   {TriangleAreaMaximum}         { return symbol(ParserSym.TRIANGLE_AREA_MAXIMUM); } // "triangleAreaMaximum"
 
   /* Identificadores */
-  {Identifier}                  { return symbol(ParserSym.IDENTIFIER, yytext()); }  // Devuelve el texto completo del identificador, ejemplo: "variable1"
+  {Identifier}                  { 
+                                    String value = yytext();
+                                    int longitud = value.length();
+
+                                  if (longitud > STRING_MAX_LENGTH) {
+                                      throw new InvalidLengthException("String demasiado largo: " + value);
+                                  }
+                                  SymbolTableGenerator.insertVariable(value, "", "VARIABLE");
+
+                                  return symbol(ParserSym.IDENTIFIER, yytext()); 
+                                    
+                                }  // Devuelve el texto completo del identificador, ejemplo: "variable1"
     
   /* Constantes */  
   {IntegerConstant}             {
