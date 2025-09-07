@@ -51,8 +51,8 @@ terminal READ;
 terminal WRITE;
 
 //Funciones especiales del lenguaje
-terminal EQUAL_EXPRESSIONS_FUNCTION;
-terminal TRIANGLE_AREA_MAXIMUM_FUNCTION;
+terminal EQUAL_EXPRESSIONS;
+terminal TRIANGLE_AREA_MAXIMUM;
 
 //Constantes  
 terminal String INTEGER_CONSTANT;
