@@ -63,24 +63,130 @@ terminal String STRING_CONSTANT;
 terminal String IDENTIFIER;
 
 
-/*** Elementos No Terminales ***/                /****************************** SEGUIR DE ACA PARA ABAJO ******************************/
-non terminal sentence;
+// ----------------------------------------------------
+// No terminales
+// ----------------------------------------------------
+non terminal program;
+non terminal statements;
+non terminal statement;
 non terminal assignment;
+non terminal if_statement;
+non terminal else_clause;
+non terminal while_statement;
+non terminal read_statement;
+non terminal write_statement;
 non terminal expression;
 non terminal term;
 non terminal factor;
+non terminal condition;
+non terminal simple_condition;
+non terminal compound_condition;
+non terminal variable_declaration;
+non terminal init_block;
 
-// Start Symbol Definition
-start with sentence;
+// ----------------------------------------------------
+// Start Symbol
+// ----------------------------------------------------
+start with program;
 
-sentence ::= assignment {: System.out.println("End"); :};
-assignment ::= IDENTIFIER ASSIG expression {: System.out.println("Assignment"); :};
-expression ::= expression PLUS term {: System.out.println("+"); :};
-expression ::= expression SUB term {: System.out.println("-"); :};
-expression ::= term {: System.out.println("Expression = Term"); :};
-term ::= term MULT factor {: System.out.println("*"); :};
-term ::= term DIV factor {: System.out.println("/"); :};
-term ::= factor {: System.out.println("Term = factor"); :};
-factor ::= IDENTIFIER:id  {: System.out.println("Id: " + id); :};
-factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant ); :};
-factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};
+// ----------------------------------------------------
+// Reglas del parser
+// ----------------------------------------------------
+
+program ::= statements {: System.out.println("Inicio del análisis"); :};
+
+statements ::= /* vacío */ 
+             | statements statement;
+
+statement ::= assignment
+            | if_statement
+            | while_statement
+            | read_statement
+            | write_statement
+            | init_block;
+
+assignment ::= IDENTIFIER ASSIG expression {: 
+                    System.out.println("Asignación: " + $IDENTIFIER + " := " + $expression); 
+                 :};
+
+if_statement ::= IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET else_clause {: 
+                    System.out.println("If con condición"); 
+                 :};
+
+else_clause ::= /* vacío */ 
+              | ELSE OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET {: 
+                    System.out.println("Else"); 
+                 :};
+
+while_statement ::= WHILE OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET {: 
+                    System.out.println("While con condición"); 
+                 :};
+
+read_statement ::= READ OPEN_BRACKET IDENTIFIER CLOSE_BRACKET {: 
+                    System.out.println("Read de variable: " + $IDENTIFIER); 
+                 :};
+
+write_statement ::= WRITE OPEN_BRACKET expression_or_string CLOSE_BRACKET {: 
+                    System.out.println("Write de: " + $expression_or_string); 
+                 :};
+
+expression_or_string ::= expression
+                       | STRING_CONSTANT {: 
+                            SymbolTableGenerator.insertStringConstant("_" + $STRING_CONSTANT, "CTE_STRING", $STRING_CONSTANT, $STRING_CONSTANT.length());
+                            System.out.println("String Constante: " + $STRING_CONSTANT); 
+                         :};
+
+expression ::= expression PLUS term {: System.out.println("Suma"); :}
+             | expression SUB term {: System.out.println("Resta"); :}
+             | term;
+
+term ::= term MULT factor {: System.out.println("Multiplicación"); :}
+       | term DIV factor {: System.out.println("División"); :}
+       | factor;
+
+factor ::= IDENTIFIER {: 
+                        System.out.println("Id: " + $IDENTIFIER); 
+                        SymbolTableGenerator.insertVariable($IDENTIFIER);
+                     :}
+         | INTEGER_CONSTANT {: 
+                        System.out.println("Constante Entera: " + $INTEGER_CONSTANT); 
+                        SymbolTableGenerator.insertNonStringConstant("_" + $INTEGER_CONSTANT, "CTE_INTEGER", $INTEGER_CONSTANT);
+                     :}
+         | FLOAT_CONSTANT {: 
+                        System.out.println("Constante Float: " + $FLOAT_CONSTANT); 
+                        SymbolTableGenerator.insertNonStringConstant("_" + $FLOAT_CONSTANT, "CTE_FLOAT", $FLOAT_CONSTANT);
+                     :}
+         | OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor entre paréntesis"); :};
+
+condition ::= simple_condition
+            | NOT simple_condition {: System.out.println("Condición NOT"); :}
+            | compound_condition {: System.out.println("Condición compuesta"); :};
+
+simple_condition ::= expression LESS expression {: System.out.println("Condición: <"); :}
+                   | expression GREATER expression {: System.out.println("Condición: >"); :}
+                   | expression EQUAL expression {: System.out.println("Condición: =="); :}
+                   | expression NOT_EQUAL expression {: System.out.println("Condición: !="); :}
+                   | expression LESS_EQUAL expression {: System.out.println("Condición: <="); :}
+                   | expression GREATER_EQUAL expression {: System.out.println("Condición: >="); :};
+
+compound_condition ::= simple_condition AND simple_condition {: System.out.println("Condición AND"); :}
+                     | simple_condition OR simple_condition {: System.out.println("Condición OR"); :};
+
+init_block ::= INIT OPEN_CURLY_BRACKET variable_declaration_list CLOSE_CURLY_BRACKET {: 
+                    System.out.println("Inicio de bloque Init"); 
+              :};
+
+variable_declaration_list ::= variable_declaration
+                            | variable_declaration_list variable_declaration;
+
+variable_declaration ::= IDENTIFIER_LIST COLON type_specifier {: 
+                            System.out.println("Declaración de variable(s): " + $IDENTIFIER_LIST + " tipo: " + $type_specifier); 
+                            SymbolTableGenerator.insertVariables($IDENTIFIER_LIST, $type_specifier);
+                        :};
+
+IDENTIFIER_LIST ::= IDENTIFIER
+                  | IDENTIFIER_LIST COMMA IDENTIFIER;
+
+type_specifier ::= TYPE_INT
+                 | TYPE_FLOAT
+                 | TYPE_STRING;
