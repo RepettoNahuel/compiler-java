@@ -167,7 +167,7 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
                                       throw new InvalidIntegerException("Constante entera inválida o fuera de rango: " + value);
                                   }
 
-                                  SymbolTableGenerator.insertNonStringConstant("_" + value, "CTE_INTEGER", value);
+                                  SymbolTableGenerator.insertNonStringConstant("_" + value, value, "CTE_INTEGER");
                                   return symbol(ParserSym.INTEGER_CONSTANT, value);
                                 }
 
@@ -182,7 +182,7 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
                                       throw new InvalidFloatException("Constante float inválida o fuera de rango: " + value);
                                   }
 
-                                  SymbolTableGenerator.insertNonStringConstant("_" + value, "CTE_FLOAT", value);
+                                  SymbolTableGenerator.insertNonStringConstant("_" + value, value, "CTE_FLOAT");
                                   return symbol(ParserSym.FLOAT_CONSTANT, value);
                                 }
 
@@ -195,7 +195,7 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
                                   }
 
                                   String generatedName = "_stringConstant" + stringNbr++;
-                                  SymbolTableGenerator.insertStringConstant(generatedName, "CTE_STRING", contenido, longitud);
+                                  SymbolTableGenerator.insertStringConstant(generatedName, contenido, "CTE_STRING", longitud);
                                   return symbol(ParserSym.STRING_CONSTANT, generatedName);
                                }
 
