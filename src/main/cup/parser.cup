@@ -1,6 +1,7 @@
 package lyc.compiler;
 
 import java_cup.runtime.*;
+import lyc.compiler.files.SymbolTableGenerator;
 
 class Parser;
 
@@ -82,7 +83,10 @@ non terminal condition;
 non terminal simple_condition;
 non terminal compound_condition;
 non terminal variable_declaration;
+non terminal variable_declaration_list;
 non terminal init_block;
+non terminal String identifier_list;
+non terminal type_specifier;
 
 // ----------------------------------------------------
 // Start Symbol
@@ -103,11 +107,17 @@ statement ::= assignment
             | while_statement
             | read_statement
             | write_statement
-            | init_block;
+            | init_block;   
 
-assignment ::= IDENTIFIER ASSIG expression {: 
-                    System.out.println("Asignación: " + $IDENTIFIER + " := " + $expression); 
-                 :};
+assignment ::=  IDENTIFIER:id ASSIG expression:e {: 
+                    System.out.println("Asignación: " + id + " := " + e); 
+                 :}
+                |  IDENTIFIER:id ASSIG STRING_CONSTANT:strc{: 
+                    System.out.println("Constante String: " + strc); 
+                    System.out.println("Asignación: " + id + " := " + strc); 
+                 :}
+
+                 ;
 
 if_statement ::= IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET else_clause {: 
                     System.out.println("If con condición"); 
@@ -122,41 +132,38 @@ while_statement ::= WHILE OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY_BRACKE
                     System.out.println("While con condición"); 
                  :};
 
-read_statement ::= READ OPEN_BRACKET IDENTIFIER CLOSE_BRACKET {: 
-                    System.out.println("Read de variable: " + $IDENTIFIER); 
+read_statement ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET {: 
+                    System.out.println("Read de variable: " + id); 
                  :};
 
-write_statement ::= WRITE OPEN_BRACKET expression_or_string CLOSE_BRACKET {: 
-                    System.out.println("Write de: " + $expression_or_string); 
+write_statement ::= WRITE OPEN_BRACKET expression:exp CLOSE_BRACKET {: 
+                    System.out.println("Write de: " + exp); 
+                 :} 
+                 | WRITE OPEN_BRACKET STRING_CONSTANT:sc CLOSE_BRACKET {: 
+                    System.out.println("Write de: " + sc); 
                  :};
 
-expression_or_string ::= expression
-                       | STRING_CONSTANT {: 
-                            SymbolTableGenerator.insertStringConstant("_" + $STRING_CONSTANT, "CTE_STRING", $STRING_CONSTANT, $STRING_CONSTANT.length());
-                            System.out.println("String Constante: " + $STRING_CONSTANT); 
-                         :};
+expression ::= expression:left PLUS term:right {: System.out.println("Suma"); RESULT = left + "+" + right; :}
+             | expression:left SUB term:right {: System.out.println("Resta"); RESULT = left + "-" + right; :}
+             | term:term {: RESULT = term; :};
 
-expression ::= expression PLUS term {: System.out.println("Suma"); :}
-             | expression SUB term {: System.out.println("Resta"); :}
-             | term;
+term ::= term:left MULT factor:right {: System.out.println("Multiplicación"); RESULT = left + "*" + right; :}
+       | term:left DIV factor:right {: System.out.println("División"); RESULT = left + "/" + right; :}
+       | factor:value {: RESULT = value; :};
 
-term ::= term MULT factor {: System.out.println("Multiplicación"); :}
-       | term DIV factor {: System.out.println("División"); :}
-       | factor;
-
-factor ::= IDENTIFIER {: 
-                        System.out.println("Id: " + $IDENTIFIER); 
-                        SymbolTableGenerator.insertVariable($IDENTIFIER);
+factor ::= IDENTIFIER:id {: 
+                        System.out.println("Id: " + id); 
+                        RESULT = id;
                      :}
-         | INTEGER_CONSTANT {: 
-                        System.out.println("Constante Entera: " + $INTEGER_CONSTANT); 
-                        SymbolTableGenerator.insertNonStringConstant("_" + $INTEGER_CONSTANT, "CTE_INTEGER", $INTEGER_CONSTANT);
+         | INTEGER_CONSTANT:intc {: 
+                        System.out.println("Constante Entera: " + intc); 
+                        RESULT = intc;
                      :}
-         | FLOAT_CONSTANT {: 
-                        System.out.println("Constante Float: " + $FLOAT_CONSTANT); 
-                        SymbolTableGenerator.insertNonStringConstant("_" + $FLOAT_CONSTANT, "CTE_FLOAT", $FLOAT_CONSTANT);
+         | FLOAT_CONSTANT:floatc {: 
+                        System.out.println("Constante Float: " + floatc); 
+                        RESULT = floatc;
                      :}
-         | OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor entre paréntesis"); :};
+         | OPEN_BRACKET expression:exp CLOSE_BRACKET {: System.out.println("Factor entre paréntesis"); RESULT = "(" + exp + ")"; :};
 
 condition ::= simple_condition
             | NOT simple_condition {: System.out.println("Condición NOT"); :}
@@ -176,17 +183,17 @@ init_block ::= INIT OPEN_CURLY_BRACKET variable_declaration_list CLOSE_CURLY_BRA
                     System.out.println("Inicio de bloque Init"); 
               :};
 
+variable_declaration ::= identifier_list:list COLON type_specifier:type {: 
+                            System.out.println("Declaración de variable(s): " + list + " tipo: " + type); 
+                            SymbolTableGenerator.insertVariables((String)list, (String)type);
+                        :};
+
 variable_declaration_list ::= variable_declaration
                             | variable_declaration_list variable_declaration;
 
-variable_declaration ::= IDENTIFIER_LIST COLON type_specifier {: 
-                            System.out.println("Declaración de variable(s): " + $IDENTIFIER_LIST + " tipo: " + $type_specifier); 
-                            SymbolTableGenerator.insertVariables($IDENTIFIER_LIST, $type_specifier);
-                        :};
+identifier_list ::= IDENTIFIER:id {: RESULT = id; :}
+                  | identifier_list:list COMMA IDENTIFIER:id {: RESULT = list + "," + id; :};
 
-IDENTIFIER_LIST ::= IDENTIFIER
-                  | IDENTIFIER_LIST COMMA IDENTIFIER;
-
-type_specifier ::= TYPE_INT
-                 | TYPE_FLOAT
-                 | TYPE_STRING;
+type_specifier ::= TYPE_INT {: RESULT = "Int"; :}
+                 | TYPE_FLOAT {: RESULT = "Float"; :}
+                 | TYPE_STRING {: RESULT = "String"; :};
