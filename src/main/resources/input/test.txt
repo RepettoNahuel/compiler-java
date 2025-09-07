@@ -1,1 +1,50 @@
-c:=d*(e-21)/4
+a := 99999.99
+b := 99.
+c := .9999
+
+d := "@sdADaSjfla%dfg"
+e := "asldk  fh sjf"
+
+f:=d*(e-21)/4
+
+init {
+    a1, b1 : Float
+    variable1 : Int
+    p1, p2, p3 : String
+}
+
+read(base)
+write(“ewr”)
+write(var1)
+
+if (not a > b)
+{
+    write("a no es mas grande que b")
+}
+
+if (a > b and c > b)
+{
+    write("a es mas grande que b y c es mas grande que b")
+}
+
+if (a > b or c > b)
+{
+    write("a es mas grande que b o c es mas grande que b")
+}
+
+if (a > b)
+{
+    write("a es mas grande que b")
+}
+else
+{
+    write("a es mas chico o igual a b")
+}
+
+while (a > b)
+{
+    write("a es mas grande que b")
+    a = a - 1
+}
+
+#+ Esto es un comentario +#
