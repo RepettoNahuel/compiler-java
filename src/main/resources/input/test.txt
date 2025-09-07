@@ -14,7 +14,7 @@ init {
 }
 
 read(base)
-write(“ewr”)
+write("ewr")
 write(var1)
 
 if (not a > b)
@@ -44,7 +44,7 @@ else
 while (a > b)
 {
     write("a es mas grande que b")
-    a = a - 1
+    a := a - 1
 }
 
 #+ Esto es un comentario +#
