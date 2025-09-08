@@ -71,6 +71,7 @@ OpenSquareBracket   = "["
 CloseSquareBracket  = "]"
 Comma               = ","
 Colon               = ":"
+SemiColon           = ";"
 
 /* Palabras clave */
 While       = "while"
@@ -139,6 +140,7 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
   {CloseSquareBracket}          { return symbol(ParserSym.CLOSE_SQUARE_BRACKET); }  // "]"
   {Comma}                       { return symbol(ParserSym.COMMA); }                 // ","
   {Colon}                       { return symbol(ParserSym.COLON); }                 // ":"
+  {SemiColon}                   { return symbol(ParserSym.SEMI_COLON); }            // ";"
 
   /* Palabras clave */
   {While}                       { return symbol(ParserSym.WHILE); }                 // "while"

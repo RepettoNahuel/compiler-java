@@ -8,11 +8,17 @@ import java.util.Map;
 public class SymbolTableGenerator implements FileGenerator{
 
     // Inner class to represent a symbol
-    private static class Symbol {
-        String name;
-        String value;
-        String type;
-        int length; // Only used for strings
+    public static class Symbol {
+        private String name;
+        private String value;
+        private String type;
+        private int length; // Only used for strings
+
+        public String getName() { return name; }
+        public String getValue() { return value; }
+        public void setValue(String value) { this.value = value; }
+        public String getType() { return type; }
+        public int getLength() { return length; }
 
         // Strings
         Symbol(String name, String value, String type, int length) {
@@ -21,16 +27,14 @@ public class SymbolTableGenerator implements FileGenerator{
             this.type = type;
             this.length = length;
         }
-        
         // Non-strings
         Symbol(String name, String value, String type) {
             this.name = name;
             this.value = value;
             this.type = type;
         }
-
-
     }
+
     // The symbol table
     private static final Map<String, Symbol> symbolTable = new HashMap<>();
 
@@ -59,6 +63,11 @@ public class SymbolTableGenerator implements FileGenerator{
         for (String var : variables) {
             insertVariable(var.trim(), "", type);
         }
+    }
+
+    // Devuelve el símbolo completo por nombre
+    public static Symbol getSymbol(String name) {
+        return symbolTable.get(name);
     }
 }
 
