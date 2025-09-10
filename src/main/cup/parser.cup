@@ -90,6 +90,7 @@ non terminal String identifier_list;
 non terminal type_specifier;
 non terminal triangle;
 non terminal point;
+non terminal expression_list;
 
 // ----------------------------------------------------
 // Start Symbol
@@ -169,6 +170,11 @@ expression ::= expression:left PLUS term:right {: System.out.println("Suma"); RE
                 System.out.println("Área máxima: " + maxArea);
                 RESULT = String.valueOf(maxArea);
             :}
+            | EQUAL_EXPRESSIONS OPEN_BRACKET expression_list:el CLOSE_BRACKET 
+               {: 
+                   RESULT = lyc.compiler.files.ExpressionUtils.equalExpressions($el);
+                   System.out.println("EqualExpressions: " + RESULT);
+               :};
             ;
 
 triangle ::= OPEN_SQUARE_BRACKET point:p1 SEMI_COLON point:p2 SEMI_COLON point:p3 CLOSE_SQUARE_BRACKET {: 
@@ -176,6 +182,19 @@ triangle ::= OPEN_SQUARE_BRACKET point:p1 SEMI_COLON point:p2 SEMI_COLON point:p
             :};
 
 point ::= expression:x COMMA expression:y {: RESULT = new Object[]{x, y}; :};
+
+expression_list ::= expression:exp
+                   {:
+                       java.util.List<Object> list = new java.util.ArrayList<>();
+                       list.add($exp);
+                       RESULT = list;
+                   :}
+                 | expression_list:list COMMA expression:exp
+                   {:
+                       java.util.List<Object> list = (java.util.List<Object>)$list;
+                       list.add($exp);
+                       RESULT = list;
+                   :};
 
 term ::= term:left MULT factor:right {: System.out.println("Multiplicación"); RESULT = left + "*" + right; :}
        | term:left DIV factor:right {: System.out.println("División"); RESULT = left + "/" + right; :}
