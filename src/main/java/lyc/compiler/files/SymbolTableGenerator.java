@@ -40,8 +40,13 @@ public class SymbolTableGenerator implements FileGenerator{
 
     @Override
     public void generate(FileWriter fileWriter) throws IOException {
+        fileWriter.write("Nombre | Tipo | Valor | Longitud\n");
         for (Symbol symbol : symbolTable.values()) {
-            fileWriter.write(symbol.name + " " + symbol.type + " " + symbol.value + "\n");
+            String name = symbol.name != null ? symbol.name : " ";
+            String type = symbol.type != null ? symbol.type : " ";
+            String value = symbol.value != null ? symbol.value : " ";
+            String length = (symbol.type != null && symbol.type.equals("CTE_STRING")) ? String.valueOf(symbol.length) : " ";
+            fileWriter.write(name + " | " + type + " | " + value + " | " + length + "\n");
         }
     }
 
