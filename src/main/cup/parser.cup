@@ -60,6 +60,7 @@ terminal TRIANGLE_AREA_MAXIMUM;
 terminal String INTEGER_CONSTANT;
 terminal String FLOAT_CONSTANT;
 terminal String STRING_CONSTANT;
+terminal String BOOLEAN_CONSTANT;
 
 //Identificadores
 terminal String IDENTIFIER;
@@ -90,7 +91,10 @@ non terminal String identifier_list;
 non terminal type_specifier;
 non terminal triangle;
 non terminal point;
-non terminal expression_list;
+non terminal Object expression_list;
+non terminal numeric_expression;
+non terminal numeric_term;
+non terminal numeric_factor;
 
 // ----------------------------------------------------
 // Start Symbol
@@ -113,136 +117,277 @@ statement ::= assignment
             | write_statement
             | init_block;   
 
-assignment ::=  IDENTIFIER:id ASSIG expression:e {: 
-               System.out.println("[ASSIGN] RESULT de expression: " + e);
-               lyc.compiler.files.SymbolTableGenerator.Symbol simbolo = lyc.compiler.files.SymbolTableGenerator.getSymbol(id);
-               String valorAsignar = String.valueOf(e);
-               lyc.compiler.files.SymbolTableGenerator.Symbol origen = lyc.compiler.files.SymbolTableGenerator.getSymbol(valorAsignar);
-               if (origen != null && origen.getValue() != null && !origen.getValue().isEmpty()) {
-                   valorAsignar = origen.getValue();
-               }
-               if (simbolo != null) {
-                  simbolo.setValue(valorAsignar);
-               }
-               System.out.println("Asignación: " + id + " := " + valorAsignar); 
-                 :}
-                |  IDENTIFIER:id ASSIG STRING_CONSTANT:strc{: 
-               lyc.compiler.files.SymbolTableGenerator.Symbol simbolo = lyc.compiler.files.SymbolTableGenerator.getSymbol(id);
-               if (simbolo != null) {
-                  simbolo.setValue(String.valueOf(strc));
-               }
-               System.out.println("Constante String: " + strc); 
-               System.out.println("Asignación: " + id + " := " + strc); 
-                 :}
-                 ;
+assignment ::=  IDENTIFIER:id ASSIG expression:e
+                    {: 
+                        System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + e); 
+                    :}
+                |  IDENTIFIER:id ASSIG STRING_CONSTANT:strc
+                    {:
+                        System.out.println("[ASSIGNMENT] Id := String Constant -> " + id + " := " + strc); 
+                    :};
 
-if_statement ::= IF OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET else_clause {: 
-                    System.out.println("If con condición"); 
-                 :};
+if_statement ::= IF OPEN_BRACKET condition:cond CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET else_clause 
+                    {: 
+                        System.out.println("[IF] ( Condition ) { Statements } else"); 
+                    :};
 
 else_clause ::= /* vacío */ 
-              | ELSE OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET {: 
-                    System.out.println("Else"); 
-                 :};
+                | ELSE OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET 
+                    {: 
+                        System.out.println("[ELSE] { Statements } "); 
+                    :};
 
-while_statement ::= WHILE OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET {: 
-                    System.out.println("While con condición"); 
-                 :};
+while_statement ::= WHILE OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET 
+                    {: 
+                        System.out.println("[WHILE]  ( Condition )  { Statements }"); 
+                    :};
 
-read_statement ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET {: 
-                    System.out.println("Read de variable: " + id); 
-                 :};
+read_statement ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET 
+                    {: 
+                        System.out.println("[READ]  ( Identifier ): " + id); 
+                    :};
 
-write_statement ::= WRITE OPEN_BRACKET expression:exp CLOSE_BRACKET {: 
-                    System.out.println("Write de: " + exp); 
-                 :} 
-                 | WRITE OPEN_BRACKET STRING_CONSTANT:sc CLOSE_BRACKET {: 
-                    System.out.println("Write de: " + sc); 
-                 :};
+write_statement ::= WRITE OPEN_BRACKET expression:exp CLOSE_BRACKET 
+                    {: 
+                        System.out.println("[WRITE] ( Expression ): " + exp); 
+                    :} 
+                | WRITE OPEN_BRACKET STRING_CONSTANT:sc CLOSE_BRACKET {: 
+                        System.out.println("[WRITE] ( String Constante ): " + sc); 
+                    :};
 
-expression ::= expression:left PLUS term:right {: System.out.println("Suma"); RESULT = left + "+" + right; :}
-            | expression:left SUB term:right {: System.out.println("Resta"); RESULT = left + "-" + right; :}
-            | term:term {: RESULT = term; :}
-            | TRIANGLE_AREA_MAXIMUM OPEN_BRACKET triangle:t1 SEMI_COLON triangle:t2 CLOSE_BRACKET {: 
-                double area1 = lyc.compiler.files.GeometryUtils.calculateTriangleArea(t1);
-                double area2 = lyc.compiler.files.GeometryUtils.calculateTriangleArea(t2);
-                double maxArea = Math.max(area1, area2);
-                System.out.println("Área máxima: " + maxArea);
-                RESULT = String.valueOf(maxArea);
-            :}
-            | EQUAL_EXPRESSIONS OPEN_BRACKET expression_list:el CLOSE_BRACKET 
-               {: 
-                   RESULT = lyc.compiler.files.ExpressionUtils.equalExpressions($el);
-                   System.out.println("EqualExpressions: " + RESULT);
-               :};
-            ;
+expression ::= expression:left PLUS term:right
+                    {:
+                        System.out.println("[EXPRESSION] Expresion + Term");
+                        RESULT = left + "+" + right;
+                    :}
+                | expression:left SUB term:right 
+                    {: 
+                        System.out.println("[EXPRESSION] Expresion - Term"); 
+                        RESULT = left + "-" + right; 
+                    :}
+                | term:term
+                    {: 
+                        System.out.println("[EXPRESSION] Term"); 
+                        RESULT = term;
+                    :}
+                | TRIANGLE_AREA_MAXIMUM OPEN_BRACKET triangle:t1 SEMI_COLON triangle:t2 CLOSE_BRACKET 
+                    {: 
+                        double area1 = lyc.compiler.files.GeometryUtils.calculateTriangleArea(t1);
+                        double area2 = lyc.compiler.files.GeometryUtils.calculateTriangleArea(t2);
+                        double maxArea = Math.max(area1, area2);
+                        System.out.println("[EXPRESSION] triangleAreaMaximum ( Triangle ; Triangle ): " + maxArea);
+                        RESULT = String.valueOf(maxArea);
+                    :}
+                | EQUAL_EXPRESSIONS OPEN_BRACKET expression_list:el CLOSE_BRACKET
+                    {: 
+                        String res = lyc.compiler.files.ExpressionUtils.equalExpressions(el);
+                        System.out.println("[EXPRESSION] equalExpressions ( Expression List ): " + el);
+                        RESULT = res;
+                    :};
 
-triangle ::= OPEN_SQUARE_BRACKET point:p1 SEMI_COLON point:p2 SEMI_COLON point:p3 CLOSE_SQUARE_BRACKET {: 
-                RESULT = new Object[]{p1, p2, p3}; 
-            :};
+triangle ::= OPEN_SQUARE_BRACKET point:p1 SEMI_COLON point:p2 SEMI_COLON point:p3 CLOSE_SQUARE_BRACKET 
+                    {: 
+                        System.out.println("[TRIANGLE] [point ; point ; point ]");
+                        RESULT = new Object[]{p1, p2, p3}; 
+                    :};
 
-point ::= expression:x COMMA expression:y {: RESULT = new Object[]{x, y}; :};
+point ::= numeric_expression:x COMMA numeric_expression:y 
+                    {: 
+                        System.out.println("[POINT] Numeric Expression , Numeric Expression");
+                        RESULT = new Object[]{x, y};
+                    :};
 
 expression_list ::= expression:exp
-                   {:
-                       java.util.List<Object> list = new java.util.ArrayList<>();
-                       list.add($exp);
-                       RESULT = list;
-                   :}
-                 | expression_list:list COMMA expression:exp
-                   {:
-                       java.util.List<Object> list = (java.util.List<Object>)$list;
-                       list.add($exp);
-                       RESULT = list;
-                   :};
+                    {: 
+                        System.out.println("[EXPRESSION LIST] Expression");
+                        java.util.List<Object> list = new java.util.ArrayList<>();
+                        list.add(exp);
+                        RESULT = list;
+                    :}
+                | expression_list:list COMMA expression:exp
+                    {: 
+                        System.out.println("[EXPRESSION LIST] Expression List , Expression");
+                        java.util.List<Object> tmp = (java.util.List<Object>) list;
+                        tmp.add(exp);
+                        RESULT = tmp;
+                    :};
 
-term ::= term:left MULT factor:right {: System.out.println("Multiplicación"); RESULT = left + "*" + right; :}
-       | term:left DIV factor:right {: System.out.println("División"); RESULT = left + "/" + right; :}
-       | factor:value {: RESULT = value; :};
+term ::= term:left MULT factor:right 
+                    {: 
+                        System.out.println("[TERM] Term * Factor"); 
+                        RESULT = left + "*" + right; 
+                    :}
+                | term:left DIV factor:right 
+                    {: 
+                        System.out.println("[TERM] Term / Factor"); 
+                        RESULT = left + "/" + right; 
+                    :}
+                | factor:value 
+                    {: 
+                        System.out.println("[TERM] Factor");
+                        RESULT = value; 
+                    :};
 
-factor ::= IDENTIFIER:id {: 
-    System.out.println("[FACTOR] Identificador: " + id);
-    RESULT = id;
-:}
-| INTEGER_CONSTANT:intc {: 
-    System.out.println("[FACTOR] Constante Entera: " + intc);
-    RESULT = intc;
-:}
-| FLOAT_CONSTANT:floatc {: 
-    System.out.println("[FACTOR] Constante Float: " + floatc);
-    RESULT = floatc;
-:}
-| OPEN_BRACKET expression:exp CLOSE_BRACKET {: System.out.println("Factor entre paréntesis"); RESULT = "(" + exp + ")"; :};
+factor ::= IDENTIFIER:id 
+                    {: 
+                        System.out.println("[FACTOR] Identificador: " + id);
+                        RESULT = id;
+                    :}
+                | INTEGER_CONSTANT:intc {: 
+                        System.out.println("[FACTOR] Constante Entera: " + intc);
+                        RESULT = intc;
+                    :}
+                | FLOAT_CONSTANT:floatc 
+                    {: 
+                        System.out.println("[FACTOR] Constante Float: " + floatc);
+                        RESULT = floatc;
+                    :}
+                | OPEN_BRACKET expression:exp CLOSE_BRACKET 
+                    {: 
+                        System.out.println("[FACTOR] ( Expression )"); 
+                        RESULT = "(" + exp + ")"; 
+                    :};
+
+// Numeric-only expressions
+numeric_expression ::= numeric_expression:left PLUS numeric_term:right 
+                    {: 
+                        System.out.println("[NUMERIC EXPRESSION] Numeric Expression + Numeric Term");
+                        RESULT = left + "+" + right; 
+                    :}
+                | numeric_expression:left SUB numeric_term:right 
+                    {: 
+                        System.out.println("[NUMERIC EXPRESSION] Numeric Expression + Numeric Term");
+                        RESULT = left + "-" + right; 
+                    :}
+                | numeric_term:term 
+                    {: 
+                        System.out.println("[NUMERIC EXPRESSION] Numeric Expression + Numeric Term");
+                        RESULT = term; 
+                    :};
+
+numeric_term ::= numeric_term:left MULT numeric_factor:right 
+                    {: 
+                        System.out.println("[NUMERIC TERM] Numeric Term * Numeric Factor");
+                        RESULT = left + "*" + right; 
+                    :}
+                | numeric_term:left DIV numeric_factor:right 
+                    {: 
+                        System.out.println("[NUMERIC TERM] Numeric Term * Numeric Factor");
+                        RESULT = left + "/" + right; 
+                    :}
+                | numeric_factor:value 
+                    {: 
+                        System.out.println("[NUMERIC TERM] Numeric Term * Numeric Factor");
+                        RESULT = value; 
+                    :};
+
+numeric_factor ::= IDENTIFIER:id 
+                    {: 
+                        System.out.println("[NUMERIC FACTOR] Identifier: " + id);
+                        RESULT = id; 
+                    :}
+                | INTEGER_CONSTANT:intc 
+                    {: 
+                        System.out.println("[NUMERIC FACTOR]  Integer Constant: " + intc);
+                        RESULT = intc; 
+                    :}
+                | FLOAT_CONSTANT:floatc 
+                    {: 
+                        System.out.println("[NUMERIC FACTOR] Float Constant: " + floatc);
+                        RESULT = floatc; 
+                    :}
+                | OPEN_BRACKET numeric_expression:exp CLOSE_BRACKET 
+                    {: 
+                        System.out.println("[NUMERIC FACTOR] Numeric Expression: " + exp);
+                        RESULT = exp; 
+                    :};
 
 condition ::= simple_condition
-            | NOT simple_condition {: System.out.println("Condición NOT"); :}
-            | compound_condition {: System.out.println("Condición compuesta"); :};
+                | NOT simple_condition 
+                    {: 
+                        System.out.println("[CONDITION] NOT Simple Condition"); 
+                    :}
+                | compound_condition 
+                    {: 
+                        System.out.println("[CONDITION] Compound Condition"); 
+                    :};
 
-simple_condition ::= expression LESS expression {: System.out.println("Condición: <"); :}
-                   | expression GREATER expression {: System.out.println("Condición: >"); :}
-                   | expression EQUAL expression {: System.out.println("Condición: =="); :}
-                   | expression NOT_EQUAL expression {: System.out.println("Condición: !="); :}
-                   | expression LESS_EQUAL expression {: System.out.println("Condición: <="); :}
-                   | expression GREATER_EQUAL expression {: System.out.println("Condición: >="); :};
+simple_condition ::= expression LESS expression 
+                    {: 
+                        System.out.println("[SIMPLE CONDITION] Expression < Expression"); 
+                    :}
+                | expression GREATER expression 
+                    {: 
+                        System.out.println("[SIMPLE CONDITION] Expression > Expression"); 
+                    :}
+                | expression EQUAL expression 
+                    {: 
+                        System.out.println("[SIMPLE CONDITION] Expression == Expression");
+                    :}
+                | expression NOT_EQUAL expression 
+                    {: 
+                        System.out.println("[SIMPLE CONDITION] Expression != Expression"); 
+                    :}
+                | expression LESS_EQUAL expression 
+                    {: 
+                        System.out.println("[SIMPLE CONDITION] Expression <= Expression"); 
+                    :}
+                | expression GREATER_EQUAL expression 
+                    {: 
+                        System.out.println("[SIMPLE CONDITION] Expression >= Expression"); 
+                    :};
 
-compound_condition ::= simple_condition AND simple_condition {: System.out.println("Condición AND"); :}
-                     | simple_condition OR simple_condition {: System.out.println("Condición OR"); :};
+compound_condition ::= simple_condition AND simple_condition 
+                    {: 
+                        System.out.println("[COMPOUND CONDITION] Condition AND Condition"); 
+                    :}
+                | simple_condition OR simple_condition 
+                    {: 
+                        System.out.println("[COMPOUND CONDITION] Condition OR Condition"); 
+                    :};
 
-init_block ::= INIT OPEN_CURLY_BRACKET variable_declaration_list CLOSE_CURLY_BRACKET {: 
-                    System.out.println("Inicio de bloque Init"); 
-              :};
+init_block ::= INIT OPEN_CURLY_BRACKET variable_declaration_list CLOSE_CURLY_BRACKET 
+                    {: 
+                        System.out.println("[INIT BLOCK] Init { variable_declaration_list }"); 
+                    :};
 
-variable_declaration ::= identifier_list:list COLON type_specifier:type {: 
-                            System.out.println("Declaración de variable(s): " + list + " tipo: " + type); 
-                            SymbolTableGenerator.insertVariables((String)list, (String)type);
-                        :};
+variable_declaration ::= identifier_list:list COLON type_specifier:type 
+                    {: 
+                        System.out.println("[VARIABLE DECLARATION] identifier_list : type_specifier");
+                    :};
 
 variable_declaration_list ::= variable_declaration
-                            | variable_declaration_list variable_declaration;
+                    {: 
+                        System.out.println("[VAR DECLARATION LIST] variable_declaration");
+                    :}
+                | variable_declaration_list variable_declaration
+                    {: 
+                        System.out.println("[VAR DECLARATION LIST] variable_declaration_list variable_declaration");
+                    :};
 
-identifier_list ::= IDENTIFIER:id {: RESULT = id; :}
-                  | identifier_list:list COMMA IDENTIFIER:id {: RESULT = list + "," + id; :};
+identifier_list ::= IDENTIFIER:id 
+                    {: 
+                        System.out.println("[IDENTIFIER LIST] Identifier");
+                        RESULT = id; 
+                    :}
+                | identifier_list:list COMMA IDENTIFIER:id 
+                    {: 
+                        System.out.println("[IDENTIFIER LIST] identifier_list , Identifier");
+                        RESULT = list + "," + id; 
+                    :};
 
-type_specifier ::= TYPE_INT {: RESULT = "Int"; :}
-                 | TYPE_FLOAT {: RESULT = "Float"; :}
-                 | TYPE_STRING {: RESULT = "String"; :};
+type_specifier ::= TYPE_INT 
+                    {: 
+                        System.out.println("[TYPE SPECIFIER] Type Integer" );
+                        RESULT = "Int"; 
+                    :}
+                | TYPE_FLOAT 
+                    {: 
+                        System.out.println("[TYPE SPECIFIER] Type Float" );
+                        RESULT = "Float"; 
+                    :}
+                | TYPE_STRING 
+                    {: 
+                        System.out.println("[TYPE SPECIFIER] Type String" );
+                        RESULT = "String"; 
+                    :};

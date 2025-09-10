@@ -96,9 +96,10 @@ TriangleAreaMaximum = "triangleAreaMaximum"
 Identifier = {Letter}({Letter}|{Digit})*
 
 /* Constantes */
-IntegerConstant = 0 | [1-9]{Digit}*
-FloatConstant   = {Digit}+\.{Digit}* | \.{Digit}+
+IntegerConstant = 0 | -?[1-9]{Digit}*
+FloatConstant   = -?{Digit}+\.{Digit}* | \.{Digit}+
 StringConstant = \"(.*)\"
+BooleanConstant = true | false
 
 /* Comentarios */
 Comment = "#+"([^#]|#+[^#+])*"+#"
@@ -211,6 +212,12 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
                                   SymbolTableGenerator.insertStringConstant(generatedName, contenido, "CTE_STRING", longitud);
                                   return symbol(ParserSym.STRING_CONSTANT, generatedName);
                                }
+  {BooleanConstant}             {
+                                  String value = yytext();
+                                  String generatedName = "_booleanConstant" + booleanNbr++;
+                                  SymbolTableGenerator.insertNonStringConstant(generatedName, value, "CTE_BOOLEAN");
+                                  return symbol(ParserSym.BOOLEAN_CONSTANT, generatedName);
+                                }
 
   /* whitespace */
   {WhiteSpace}                 { /* ignore */ }

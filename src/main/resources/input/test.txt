@@ -1,5 +1,6 @@
 z := 2
 x := 3.8
+a := -4
 
 areaMax := triangleAreaMaximum( [0,x; 4.0,12; 2.5,3] ; [x,0; 6,0; z,2] ) 
 
@@ -10,7 +11,7 @@ c := .9999
 d := "@sdADaSjfla%dfg"
 e := "asldk  fh sjf"
 
-f:=d*(e-21)/4
+f:=d*(e - 21)/4
 
 init {
     a1, b1 : Float
@@ -21,6 +22,12 @@ init {
 read(base)
 write("ewr")
 write(var1)
+
+a := 1
+b := 2
+c := 3
+d := 4
+
 
 if (not a > b)
 {
@@ -37,9 +44,20 @@ if (a > b or c > b)
     write("a es mas grande que b o c es mas grande que b")
 }
 
-if (a > b)
+if (b > a)
 {
-    write("a es mas grande que b")
+    if(c > b)
+    {
+        if(d > c)
+        {
+            write ("D ES SUPERIOR A TODO")
+        }
+        else
+        {
+            write("C ES SUPERIOR A TODO")
+        }
+    }
+    write("b es mas grande que a")
 }
 else
 {
@@ -51,5 +69,12 @@ while (a > b)
     write("a es mas grande que b")
     a := a - 1
 }
+
+a := 2
+b := 3
+y := true
+EqualTrue := equalExpressions(a + b, 5, b * 2, 3 + 2, a + b)
+
+EqualFalse := equalExpressions(0, -5, a + b) 
 
 #+ Esto es un comentario +#
