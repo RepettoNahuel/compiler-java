@@ -74,5 +74,9 @@ public class SymbolTableGenerator implements FileGenerator{
     public static Symbol getSymbol(String name) {
         return symbolTable.get(name);
     }
+
+    public static boolean exists(String name) {
+        return symbolTable.containsKey(name);
+    }
 }
 
