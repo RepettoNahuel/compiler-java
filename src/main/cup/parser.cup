@@ -4,13 +4,12 @@ import java_cup.runtime.*;
 import lyc.compiler.files.SymbolTableGenerator;
 import lyc.compiler.files.IntermediateCodeGenerator;
 
+class Parser;
+
 parser code {:
     private final SymbolTableGenerator symbolTable = new SymbolTableGenerator();
     private final IntermediateCodeGenerator intermediateCode = new IntermediateCodeGenerator();
 :}
-
-//class Parser;
-
 
 /*** Elementos Terminales ***/
 
@@ -114,8 +113,6 @@ start with program;
 program ::= statements 
                     {: 
                         System.out.println("Inicio del análisis");
-                        symbolTable.generate();
-                        intermediateCode.generate(); 
                     :};
 
 statements ::= /* vacío */ 
@@ -131,14 +128,14 @@ statement ::= assignment
 assignment ::=  IDENTIFIER:id ASSIG expression:e
                     {: 
                         System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + e); 
-                        if(!symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
+                        if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
                         intermediateCode.addTerceto("ASSIGN", id, e);
                         RESULT = e;
                     :}
                 |  IDENTIFIER:id ASSIG STRING_CONSTANT:strc
                     {:
                         System.out.println("[ASSIGNMENT] Id := String Constant -> " + id + " := " + strc); 
-                        if(!symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
+                        if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
                         intermediateCode.addTerceto("ASSIGN", id, strc);
                         RESULT = strc;
                     :};
@@ -156,16 +153,16 @@ else_clause ::= /* vacío */
                         intermediateCode.addTerceto("ELSE", "", "");
                     :};
 
-while_statement ::= WHILE OPEN_BRACKET condition CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET 
+while_statement ::= WHILE OPEN_BRACKET condition:cond CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET 
                     {: 
                         System.out.println("[WHILE]  ( Condition )  { Statements }"); 
-                        intermediateCode.addTerceto("WHILE", condition, "");
+                        intermediateCode.addTerceto("WHILE", cond, "");
                     :};
 
 read_statement ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET 
                     {: 
                         System.out.println("[READ]  ( Identifier ): " + id); 
-                        if(!symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
+                        if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
                         intermediateCode.addTerceto("READ", id, null);
                     :};
 
@@ -360,42 +357,42 @@ condition ::= simple_condition
                         System.out.println("[CONDITION] Compound Condition"); 
                     :};
 
-simple_condition ::= expression LESS expression 
+simple_condition ::= numeric_expression:left LESS numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression < Expression"); 
                         String temp = intermediateCode.newTemp();
                         intermediateCode.addTerceto("LESS", left, right);
                         RESULT = temp;
                     :}
-                | expression GREATER expression 
+                | numeric_expression:left GREATER numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression > Expression"); 
                         String temp = intermediateCode.newTemp();
                         intermediateCode.addTerceto("GREATER", left, right);
                         RESULT = temp;
                     :}
-                | expression EQUAL expression 
+                | numeric_expression:left EQUAL numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression == Expression");
                         String temp = intermediateCode.newTemp();
                         intermediateCode.addTerceto("EQUAL", left, right);
                         RESULT = temp;
                     :}
-                | expression NOT_EQUAL expression 
+                | numeric_expression:left NOT_EQUAL numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression != Expression"); 
                         String temp = intermediateCode.newTemp();
                         intermediateCode.addTerceto("NOT_EQUAL", left, right);
                         RESULT = temp;
                     :}
-                | expression LESS_EQUAL expression 
+                | numeric_expression:left LESS_EQUAL numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression <= Expression"); 
                         String temp = intermediateCode.newTemp();
                         intermediateCode.addTerceto("LESS_EQUAL", left, right);
                         RESULT = temp;
                     :}
-                | expression GREATER_EQUAL expression 
+                | numeric_expression:left GREATER_EQUAL numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression >= Expression"); 
                         String temp = intermediateCode.newTemp();
@@ -406,11 +403,12 @@ simple_condition ::= expression LESS expression
 compound_condition ::= simple_condition:left AND simple_condition:right 
                     {: 
                         System.out.println("[COMPOUND CONDITION] Condition AND Condition"); 
-                        if (!isBoolean(left) || !isBoolean(right)) throw new RuntimeException("Operador AND aplicado a expresiones no booleanas");
+                        //if (!lyc.compiler.files.Utils.isBoolean(left) || !lyc.compiler.files.Utils.isBoolean(right)) throw new RuntimeException("Operador AND aplicado a expresiones no booleanas");
                     :}
-                | simple_condition OR simple_condition 
+                | simple_condition:left OR simple_condition:right
                     {: 
-                        System.out.println("[COMPOUND CONDITION] Condition OR Condition"); 
+                        System.out.println("[COMPOUND CONDITION] Condition OR Condition");
+                        //if (!lyc.compiler.files.Utils.isBoolean(left) || !lyc.compiler.files.Utils.isBoolean(right)) throw new RuntimeException("Operador AND aplicado a expresiones no booleanas"); 
                     :};
 
 init_block ::= INIT OPEN_CURLY_BRACKET variable_declaration_list CLOSE_CURLY_BRACKET 
@@ -423,9 +421,9 @@ variable_declaration ::= identifier_list:list COLON type_specifier:type
                         System.out.println("[VARIABLE DECLARATION] identifier_list : type_specifier");
                         String[] ids = ((String)list).split(",");
                         for(String id : ids){
-                            if(id.length() > Constants.STRING_MAX_LENGTH) throw new RuntimeException("Nombre de identificador demasiado largo: " + id);
-                            if(symbolTable.exists(id)) throw new RuntimeException("Variable ya declarada: " + id);
-                            symbolTable.insertVariables(id, type);
+                            if(id.length() > lyc.compiler.constants.Constants.STRING_MAX_LENGTH) throw new RuntimeException("Nombre de identificador demasiado largo: " + id);
+                            if(symbolTable.existsDynamic(id)) throw new RuntimeException("Variable ya declarada: " + id);
+                            symbolTable.insertVariablesDynamic(id, type);
                         }
                     :};
 
@@ -441,14 +439,14 @@ variable_declaration_list ::= variable_declaration
 identifier_list ::= IDENTIFIER:id 
                     {: 
                         System.out.println("[IDENTIFIER LIST] Identifier");
-                        if(id.length() > Constants.STRING_MAX_LENGTH) 
+                        if(id.length() > lyc.compiler.constants.Constants.STRING_MAX_LENGTH) 
                             throw new RuntimeException("Nombre de identificador demasiado largo: " + id); 
                         RESULT = id; 
                     :}
                 | identifier_list:list COMMA IDENTIFIER:id 
                     {: 
                         System.out.println("[IDENTIFIER LIST] identifier_list , Identifier");
-                        if(id.length() > Constants.STRING_MAX_LENGTH) 
+                        if(id.length() > lyc.compiler.constants.Constants.STRING_MAX_LENGTH) 
                             throw new RuntimeException("Nombre de identificador demasiado largo: " + id); 
                         RESULT = list + "," + id; 
                     :};

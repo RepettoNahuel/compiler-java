@@ -37,6 +37,7 @@ public class SymbolTableGenerator implements FileGenerator{
 
     // The symbol table
     private static final Map<String, Symbol> symbolTable = new HashMap<>();
+    private static final Map<String, Symbol> symbolTableDynamic = new HashMap<>();
 
     @Override
     public void generate(FileWriter fileWriter) throws IOException {
@@ -48,6 +49,37 @@ public class SymbolTableGenerator implements FileGenerator{
             String length = (symbol.type != null && symbol.type.equals("CTE_STRING")) ? String.valueOf(symbol.length) : " ";
             fileWriter.write(name + " | " + type + " | " + value + " | " + length + "\n");
         }
+    }
+
+    public static void insertStringConstantDynamic(String name, String value, String type, int length) {
+        symbolTableDynamic.put(name, new Symbol(name, value, type, length));
+    }
+
+    public static void insertNonStringConstantDynamic(String name, String value, String type) {
+        symbolTableDynamic.put(name, new Symbol(name, value, type));
+    }
+
+    public static void insertVariableDynamic(String name, String value, String type) {
+        symbolTableDynamic.put(name, new Symbol(name, value, type));
+    }
+
+    public static void insertVariablesDynamic(String list, Object type) {
+        if (type == null) return;
+        type = type.toString();
+        if (list == null || list.isEmpty()) return;
+        String[] variables = list.split(",");
+        for (String var : variables) {
+            insertVariableDynamic(var.trim(), "", (String)type);
+        }
+    }
+
+    // Devuelve el símbolo completo por nombre
+    public static Symbol getSymbolDynamic(String name) {
+        return symbolTableDynamic.get(name);
+    }
+
+    public static boolean existsDynamic(String name) {
+        return symbolTableDynamic.containsKey(name);
     }
 
     public static void insertStringConstant(String name, String value, String type, int length) {
@@ -62,11 +94,13 @@ public class SymbolTableGenerator implements FileGenerator{
         symbolTable.put(name, new Symbol(name, value, type));
     }
 
-    public static void insertVariables(String list, String type) {
+    public static void insertVariables(String list, Object type) {
+        if (type == null) return;
+        type = type.toString();
         if (list == null || list.isEmpty()) return;
         String[] variables = list.split(",");
         for (String var : variables) {
-            insertVariable(var.trim(), "", type);
+            insertVariable(var.trim(), "", (String)type);
         }
     }
 

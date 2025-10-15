@@ -19,6 +19,10 @@ init {
     p1, p2, p3 : String
 }
 
+yy := (a + b)
+
+base := "Nahue salame"
+
 read(base)
 write("ewr")
 write(var1)
