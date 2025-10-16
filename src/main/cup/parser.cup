@@ -139,24 +139,54 @@ assignment ::=  IDENTIFIER:id ASSIG expression:e
                         RESULT = strc;
                     :};
 
-if_statement ::= IF OPEN_BRACKET condition:cond CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET else_clause 
-                    {: 
-                        System.out.println("[IF] ( Condition ) { Statements } else"); 
-                        IntermediateCodeGenerator.addTerceto("IF", cond, ""); 
+if_statement ::=
+                IF OPEN_BRACKET condition:c CLOSE_BRACKET
+                    {:
+                        IntermediateCodeGenerator.addTerceto("IF_FALSE", "[" + IntermediateCodeGenerator.getLastIndex() + "]", "[PENDIENTE]");
+                        IntermediateCodeGenerator.pushSalto(IntermediateCodeGenerator.getLastIndex());  // guado indice
+                    :}
+                OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET
+                else_clause
+                    {:
+                        if (!IntermediateCodeGenerator.isSaltoEmpty()) {
+                            int tercetoPendiente = IntermediateCodeGenerator.popSalto();    
+                            int finIfElse = IntermediateCodeGenerator.getNextIndex();
+                            IntermediateCodeGenerator.completarSalto(tercetoPendiente, finIfElse);  
+                        }
                     :};
 
-else_clause ::= /* vacío */ 
-                | ELSE OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET 
-                    {: 
-                        System.out.println("[ELSE] { Statements } "); 
-                        IntermediateCodeGenerator.addTerceto("ELSE", "", "");
-                    :};
+else_clause ::= /* vacío */
+                | ELSE
+                    {:  
+                        IntermediateCodeGenerator.addTerceto("BRANCH", null, "[PENDIENTE]");       
+                        if (!IntermediateCodeGenerator.isSaltoEmpty()) {
+                            int ifFalsePendiente = IntermediateCodeGenerator.popSalto();
+                            int inicioElse = IntermediateCodeGenerator.getNextIndex();
+                            IntermediateCodeGenerator.completarSalto(ifFalsePendiente, inicioElse);
+                        }
+                        IntermediateCodeGenerator.pushSalto(IntermediateCodeGenerator.getLastIndex());
+                    :}
+                OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET;                    
 
-while_statement ::= WHILE OPEN_BRACKET condition:cond CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET 
-                    {: 
-                        System.out.println("[WHILE]  ( Condition )  { Statements }"); 
-                        IntermediateCodeGenerator.addTerceto("WHILE", cond, "");
-                    :};
+
+while_statement ::=
+    WHILE
+    {:
+        IntermediateCodeGenerator.pushSalto(IntermediateCodeGenerator.getNextIndex());
+    :}
+    OPEN_BRACKET condition:cond CLOSE_BRACKET
+    {:
+        IntermediateCodeGenerator.addTerceto("IF_FALSE", "[" + IntermediateCodeGenerator.getLastIndex() + "]", "[PENDIENTE]");
+        IntermediateCodeGenerator.pushSalto(IntermediateCodeGenerator.getLastIndex());
+    :}
+    OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET
+    {:
+        int ifFalsePendiente = IntermediateCodeGenerator.popSalto();
+        int inicioWhile = IntermediateCodeGenerator.popSalto();
+        IntermediateCodeGenerator.addTerceto("BRANCH", null, "[" + inicioWhile + "]");
+        int finWhile = IntermediateCodeGenerator.getNextIndex();
+        IntermediateCodeGenerator.completarSalto(ifFalsePendiente, finWhile);
+    :};
 
 read_statement ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET 
                     {: 
