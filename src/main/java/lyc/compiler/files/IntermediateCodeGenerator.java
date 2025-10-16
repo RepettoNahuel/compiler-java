@@ -7,14 +7,14 @@ import java.util.List;
 
 public class IntermediateCodeGenerator implements FileGenerator {
 
-    private List<String[]> tercetos = new ArrayList<>();
-    private int tempCount = 0;
+    private static final List<String[]> tercetos = new ArrayList<>();
+    private static int tempCount = 0;
 
-    public String newTemp() {
+    public static String newTemp() {
         return "T" + (tempCount++);
     }
 
-    public void addTerceto(String op, Object arg1, Object arg2) {
+    public static void addTerceto(String op, Object arg1, Object arg2) {
         if(arg1 != null)
             arg1 = arg1.toString();
         if(arg2 != null)
@@ -22,7 +22,7 @@ public class IntermediateCodeGenerator implements FileGenerator {
         tercetos.add(new String[]{op, (String)arg1, (String)arg2});
     }
 
-    public void addTerceto(String op, Object arg1, Object arg2, Object result) {
+    public static void addTerceto(String op, Object arg1, Object arg2, Object result) {
         if(arg1 != null)
             arg1 = arg1.toString();
         if(arg2 != null)

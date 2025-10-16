@@ -8,7 +8,6 @@ class Parser;
 
 parser code {:
     private final SymbolTableGenerator symbolTable = new SymbolTableGenerator();
-    private final IntermediateCodeGenerator intermediateCode = new IntermediateCodeGenerator();
 :}
 
 /*** Elementos Terminales ***/
@@ -129,67 +128,67 @@ assignment ::=  IDENTIFIER:id ASSIG expression:e
                     {: 
                         System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + e); 
                         if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
-                        intermediateCode.addTerceto("ASSIGN", id, e);
+                        IntermediateCodeGenerator.addTerceto("ASSIGN", id, e);
                         RESULT = e;
                     :}
                 |  IDENTIFIER:id ASSIG STRING_CONSTANT:strc
                     {:
                         System.out.println("[ASSIGNMENT] Id := String Constant -> " + id + " := " + strc); 
                         if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
-                        intermediateCode.addTerceto("ASSIGN", id, strc);
+                        IntermediateCodeGenerator.addTerceto("ASSIGN", id, strc);
                         RESULT = strc;
                     :};
 
 if_statement ::= IF OPEN_BRACKET condition:cond CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET else_clause 
                     {: 
                         System.out.println("[IF] ( Condition ) { Statements } else"); 
-                        intermediateCode.addTerceto("IF", cond, ""); 
+                        IntermediateCodeGenerator.addTerceto("IF", cond, ""); 
                     :};
 
 else_clause ::= /* vacío */ 
                 | ELSE OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET 
                     {: 
                         System.out.println("[ELSE] { Statements } "); 
-                        intermediateCode.addTerceto("ELSE", "", "");
+                        IntermediateCodeGenerator.addTerceto("ELSE", "", "");
                     :};
 
 while_statement ::= WHILE OPEN_BRACKET condition:cond CLOSE_BRACKET OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET 
                     {: 
                         System.out.println("[WHILE]  ( Condition )  { Statements }"); 
-                        intermediateCode.addTerceto("WHILE", cond, "");
+                        IntermediateCodeGenerator.addTerceto("WHILE", cond, "");
                     :};
 
 read_statement ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET 
                     {: 
                         System.out.println("[READ]  ( Identifier ): " + id); 
                         if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
-                        intermediateCode.addTerceto("READ", id, null);
+                        IntermediateCodeGenerator.addTerceto("READ", id, null);
                     :};
 
 write_statement ::= WRITE OPEN_BRACKET expression:exp CLOSE_BRACKET 
                     {: 
                         System.out.println("[WRITE] ( Expression ): " + exp); 
-                        intermediateCode.addTerceto("WRITE", exp, null);
+                        IntermediateCodeGenerator.addTerceto("WRITE", exp, null);
                     :} 
                 | WRITE OPEN_BRACKET STRING_CONSTANT:sc CLOSE_BRACKET {: 
                         System.out.println("[WRITE] ( String Constante ): " + sc); 
-                        intermediateCode.addTerceto("WRITE", sc, null);
+                        IntermediateCodeGenerator.addTerceto("WRITE", sc, null);
                     :};
 
 expression ::= expression:left PLUS term:right
                     {:
                         System.out.println("[EXPRESSION] Expresion + Term");
                         // RESULT = left + "+" + right;
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("ADD", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("ADD", left, right);
                         RESULT = temp;
                     :}
                 | expression:left SUB term:right 
                     {: 
                         System.out.println("[EXPRESSION] Expresion - Term"); 
                         // RESULT = left + "-" + right; 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("SUB", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("SUB", left, right);
                         RESULT = temp;
                     :}
                 | term:term
@@ -243,16 +242,16 @@ term ::= term:left MULT factor:right
                     {: 
                         System.out.println("[TERM] Term * Factor"); 
                         // RESULT = left + "*" + right; 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("MULT", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("MULT", left, right);
                         RESULT = temp;
                     :}
                 | term:left DIV factor:right 
                     {: 
                         System.out.println("[TERM] Term / Factor"); 
                         // RESULT = left + "/" + right; 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("DIV", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("DIV", left, right);
                         RESULT = temp;
                     :}
                 | factor:value 
@@ -286,16 +285,16 @@ numeric_expression ::= numeric_expression:left PLUS numeric_term:right
                     {: 
                         System.out.println("[NUMERIC EXPRESSION] Numeric Expression + Numeric Term");
                         // RESULT = left + "+" + right; 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("ADD", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("ADD", left, right);
                         RESULT = temp; 
                     :}
                 | numeric_expression:left SUB numeric_term:right 
                     {: 
                         System.out.println("[NUMERIC EXPRESSION] Numeric Expression - Numeric Term");
                         // RESULT = left + "-" + right; 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("SUB", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("SUB", left, right);
                         RESULT = temp; 
                     :}
                 | numeric_term:term 
@@ -308,16 +307,16 @@ numeric_term ::= numeric_term:left MULT numeric_factor:right
                     {: 
                         System.out.println("[NUMERIC TERM] Numeric Term * Numeric Factor");
                         // RESULT = left + "*" + right; 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("MULT", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("MULT", left, right);
                         RESULT = temp;
                     :}
                 | numeric_term:left DIV numeric_factor:right 
                     {: 
                         System.out.println("[NUMERIC TERM] Numeric Term / Numeric Factor");
                         // RESULT = left + "/" + right; 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("DIV", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("DIV", left, right);
                         RESULT = temp;
                     :}
                 | numeric_factor:value 
@@ -360,43 +359,43 @@ condition ::= simple_condition
 simple_condition ::= numeric_expression:left LESS numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression < Expression"); 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("LESS", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("LESS", left, right);
                         RESULT = temp;
                     :}
                 | numeric_expression:left GREATER numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression > Expression"); 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("GREATER", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("GREATER", left, right);
                         RESULT = temp;
                     :}
                 | numeric_expression:left EQUAL numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression == Expression");
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("EQUAL", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("EQUAL", left, right);
                         RESULT = temp;
                     :}
                 | numeric_expression:left NOT_EQUAL numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression != Expression"); 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("NOT_EQUAL", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("NOT_EQUAL", left, right);
                         RESULT = temp;
                     :}
                 | numeric_expression:left LESS_EQUAL numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression <= Expression"); 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("LESS_EQUAL", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("LESS_EQUAL", left, right);
                         RESULT = temp;
                     :}
                 | numeric_expression:left GREATER_EQUAL numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression >= Expression"); 
-                        String temp = intermediateCode.newTemp();
-                        intermediateCode.addTerceto("GREATER_EQUAL", left, right);
+                        String temp = IntermediateCodeGenerator.newTemp();
+                        IntermediateCodeGenerator.addTerceto("GREATER_EQUAL", left, right);
                         RESULT = temp;
                     :};
 

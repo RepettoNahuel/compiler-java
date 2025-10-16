@@ -27,7 +27,7 @@ read(base)
 write("ewr")
 write(var1)
 
-a := 1
+a1 := 1 #+ validar +#
 b := 2
 c := 3
 d := 4
