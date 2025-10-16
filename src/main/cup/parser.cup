@@ -387,6 +387,7 @@ variable_declaration ::= identifier_list:list COLON type_specifier:type
                             if(id.length() > lyc.compiler.constants.Constants.STRING_MAX_LENGTH) throw new RuntimeException("Nombre de identificador demasiado largo: " + id);
                             if(symbolTable.existsDynamic(id)) throw new RuntimeException("Variable ya declarada: " + id);
                             symbolTable.insertVariablesDynamic(id, type);
+                            symbolTable.updateVariable(id, type);
                         }
                     :};
 

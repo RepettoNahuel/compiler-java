@@ -20,6 +20,8 @@ public class SymbolTableGenerator implements FileGenerator{
         public String getType() { return type; }
         public int getLength() { return length; }
 
+        public void setType(String type) { this.type = type; }
+
         // Strings
         Symbol(String name, String value, String type, int length) {
             this.name = name;
@@ -43,10 +45,10 @@ public class SymbolTableGenerator implements FileGenerator{
     public void generate(FileWriter fileWriter) throws IOException {
         fileWriter.write("Nombre | Tipo | Valor | Longitud\n");
         for (Symbol symbol : symbolTable.values()) {
-            String name = symbol.name != null ? symbol.name : " ";
-            String type = symbol.type != null ? symbol.type : " ";
-            String value = symbol.value != null ? symbol.value : " ";
-            String length = (symbol.type != null && symbol.type.equals("CTE_STRING")) ? String.valueOf(symbol.length) : " ";
+            String name = symbol.getName() != null ? symbol.getName() : " ";
+            String type = symbol.getType() != null ? symbol.getType() : " ";
+            String value = symbol.getValue() != null ? symbol.getValue() : " ";
+            String length = (symbol.getType() != null && symbol.getType().equals("CTE_STRING")) ? String.valueOf(symbol.getLength()) : " ";
             fileWriter.write(name + " | " + type + " | " + value + " | " + length + "\n");
         }
     }
@@ -92,6 +94,13 @@ public class SymbolTableGenerator implements FileGenerator{
 
     public static void insertVariable(String name, String value, String type) {
         symbolTable.put(name, new Symbol(name, value, type));
+    }
+
+    public static void updateVariable(String name, Object newType) {
+        if (newType == null) return;   
+        Symbol symbol = symbolTable.get(name);
+        symbol.setType(newType.toString());
+        symbolTable.put(name, symbol);
     }
 
     public static void insertVariables(String list, Object type) {
