@@ -222,11 +222,10 @@ expression ::= expression:left PLUS term:right
                     :}
                 | TRIANGLE_AREA_MAXIMUM OPEN_BRACKET triangle:t1 SEMI_COLON triangle:t2 CLOSE_BRACKET 
                     {: 
-                        double area1 = lyc.compiler.files.GeometryUtils.calculateTriangleArea(t1);
-                        double area2 = lyc.compiler.files.GeometryUtils.calculateTriangleArea(t2);
-                        double maxArea = Math.max(area1, area2);
-                        System.out.println("[EXPRESSION] triangleAreaMaximum ( Triangle ; Triangle ): " + maxArea);
-                        RESULT = String.valueOf(maxArea);
+                        System.out.println("[EXPRESSION] triangleAreaMaximum ( Triangle ; Triangle )");
+                        Object t1_area = IntermediateCodeGenerator.addTerceto("AREA", t1, null);
+                        Object t2_area = IntermediateCodeGenerator.addTerceto("AREA", t2, null);
+                        RESULT = IntermediateCodeGenerator.addTerceto("MAX", t1_area, t2_area);
                     :}
                 | EQUAL_EXPRESSIONS OPEN_BRACKET expression_list:el CLOSE_BRACKET
                     {: 
@@ -238,13 +237,14 @@ expression ::= expression:left PLUS term:right
 triangle ::= OPEN_SQUARE_BRACKET point:p1 SEMI_COLON point:p2 SEMI_COLON point:p3 CLOSE_SQUARE_BRACKET 
                     {: 
                         System.out.println("[TRIANGLE] [point ; point ; point ]");
-                        RESULT = new Object[]{p1, p2, p3}; 
+                        Object temp_tri = IntermediateCodeGenerator.addTerceto("TRI_P1_P2", p1, p2);
+                        RESULT = IntermediateCodeGenerator.addTerceto("TRIANGLE", temp_tri, p3);
                     :};
 
 point ::= numeric_expression:x COMMA numeric_expression:y 
                     {: 
                         System.out.println("[POINT] Numeric Expression , Numeric Expression");
-                        RESULT = new Object[]{x, y};
+                        RESULT = IntermediateCodeGenerator.addTerceto("POINT", x, y);
                     :};
 
 expression_list ::= expression:exp
