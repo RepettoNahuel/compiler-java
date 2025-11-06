@@ -17,6 +17,7 @@ public class SymbolTableGenerator implements FileGenerator{
         public String getName() { return name; }
         public String getValue() { return value; }
         public void setValue(String value) { this.value = value; }
+        public void setLength(int length) { this.length = length; }
         public String getType() { return type; }
         public int getLength() { return length; }
 
@@ -48,7 +49,7 @@ public class SymbolTableGenerator implements FileGenerator{
             String name = symbol.getName() != null ? symbol.getName() : " ";
             String type = symbol.getType() != null ? symbol.getType() : " ";
             String value = symbol.getValue() != null ? symbol.getValue() : " ";
-            String length = (symbol.getType() != null && symbol.getType().equals("CTE_STRING")) ? String.valueOf(symbol.getLength()) : " ";
+            String length = (symbol.getType() != null && (symbol.getType().equals("CTE_STRING") || symbol.getType().equals("String"))) ? String.valueOf(symbol.getLength()) : " ";
             fileWriter.write(name + " | " + type + " | " + value + " | " + length + "\n");
         }
     }
@@ -100,6 +101,25 @@ public class SymbolTableGenerator implements FileGenerator{
         if (newType == null) return;   
         Symbol symbol = symbolTable.get(name);
         symbol.setType(newType.toString());
+        symbolTable.put(name, symbol);
+    }
+    
+    public static String obtenerTipo(String name) {
+        Symbol symbol = symbolTable.get(name);
+        return symbol != null ? symbol.getType() : null;
+    }
+
+    public static String[] obtenerDatosFull(String name) {
+        Symbol symbol = symbolTable.get(name);
+        return symbol != null ? new String[]{symbol.getName(), symbol.getValue(), symbol.getType(), String.valueOf(symbol.getLength())} : null;
+    }
+
+    public static void updateVariableS(String name, String newType, String newValue, String newLength) {
+        if (newType == null) return;   
+        Symbol symbol = symbolTable.get(name);
+        symbol.setType(newType);
+        symbol.setValue(newValue);
+        symbol.setLength(Integer.parseInt(newLength));
         symbolTable.put(name, symbol);
     }
 
