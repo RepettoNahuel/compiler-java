@@ -166,7 +166,10 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
                                   if (longitud > STRING_MAX_LENGTH) {
                                       throw new InvalidLengthException("String demasiado largo: " + value);
                                   }
-                                  SymbolTableGenerator.insertVariable(value, "", "VARIABLE");
+
+                                  if(!SymbolTableGenerator.exists(value)) {
+                                      SymbolTableGenerator.insertVariable(value, "", "VARIABLE");
+                                  }
 
                                   return symbol(ParserSym.IDENTIFIER, yytext()); 
                                     
@@ -215,7 +218,7 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
                                   SymbolTableGenerator.insertStringConstant(generatedName, contenido, "CTE_STRING", longitud);
                                   return symbol(ParserSym.STRING_CONSTANT, generatedName);
                                 }
-                                
+
   {BooleanConstant}             {
                                   String value = yytext();
                                   String generatedName = "_booleanConstant" + booleanNbr++;
