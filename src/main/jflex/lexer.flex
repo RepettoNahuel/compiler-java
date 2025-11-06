@@ -208,10 +208,14 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
                                       throw new InvalidLengthException("String demasiado largo: " + contenido);
                                   }
 
-                                  String generatedName = "_stringConstant" + stringNbr++;
+                                  //String generatedName = "_stringConstant" + stringNbr++;
+                                  //SymbolTableGenerator.insertStringConstant(generatedName, contenido, "CTE_STRING", longitud);
+                                  
+                                  String generatedName = "_" + contenido;
                                   SymbolTableGenerator.insertStringConstant(generatedName, contenido, "CTE_STRING", longitud);
                                   return symbol(ParserSym.STRING_CONSTANT, generatedName);
-                               }
+                                }
+                                
   {BooleanConstant}             {
                                   String value = yytext();
                                   String generatedName = "_booleanConstant" + booleanNbr++;
