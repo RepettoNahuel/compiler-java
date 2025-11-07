@@ -134,14 +134,14 @@ assignment ::=  IDENTIFIER:id ASSIG expression:e
                 |  IDENTIFIER:id ASSIG STRING_CONSTANT:strc
                     {:
                         System.out.println("[ASSIGNMENT] Id := String Constant -> " + id + " := " + strc); 
-                        if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
-                        
-                        String id_type = symbolTable.obtenerTipo(id);
-                        if (id_type != "VARIABLE" && id_type != "CTE_STRING" && id_type != "STRING" && id_type != "String")  throw new RuntimeException("Asignacion incompatible: " + strc + " -> " + id);
-                        
-                        String[] datos = symbolTable.obtenerDatosFull(strc);
+                      
+                        SymbolTableGenerator.Symbol sym_id = SymbolTableGenerator.getSymbol(id);
+                        SymbolTableGenerator.Symbol sym_strc = SymbolTableGenerator.getSymbol(strc);
 
-                        symbolTable.updateVariableS(id, "String", datos[1], datos[3]);
+                        if (sym_id == null) throw new RuntimeException("La variable: "+ id + " no ha sido declarada.");
+
+                        String id_type = sym_id.getType();
+                        if (id_type != "VARIABLE" && id_type != "CTE_STRING" && id_type != "STRING" && id_type != "String") throw new RuntimeException("Asignacion incompatible. El tipo de la variable " + sym_id.getName() + ": " + id_type + " no corresponde con el tipo de la expresion " + sym_strc.getName() + ": " + sym_strc.getType());
                        
                         IntermediateCodeGenerator.addTerceto("ASSIGN", id, strc);
                         RESULT = strc;
