@@ -123,10 +123,18 @@ statement ::= assignment
 
 assignment ::=  IDENTIFIER:id ASSIG expression:e
                     {: 
-                        System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + e); 
-                        if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
-                        IntermediateCodeGenerator.addTerceto("ASSIGN", id, e);
-                        RESULT = e;
+                        String eStr = (String) e; 
+                        String aux = eStr; 
+
+                        if (eStr.length() >= 2 && eStr.charAt(0) == '(' && eStr.charAt(eStr.length() - 1) == ')') { 
+                            aux = eStr.substring(1, eStr.length() - 1); 
+                        } 
+
+                        System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + aux); 
+                        if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id); 
+
+                        IntermediateCodeGenerator.addTerceto("ASSIGN", id, aux); 
+                        RESULT = aux; 
                     :}
                 |  IDENTIFIER:id ASSIG STRING_CONSTANT:strc
                     {:
@@ -136,7 +144,7 @@ assignment ::=  IDENTIFIER:id ASSIG expression:e
                         SymbolTableGenerator.Symbol sym_strc = SymbolTableGenerator.getSymbol(strc);
 
                         String id_type = sym_id.getType();
-                        if (id_type != "VARIABLE" && id_type != "CTE_STRING" && id_type != "STRING" && id_type != "String") throw new RuntimeException("Asignacion incompatible. El tipo de la variable " + sym_id.getName() + ": " + id_type + " no corresponde con el tipo de la expresion " + sym_strc.getName() + ": " + sym_strc.getType());
+                        if (!id_type.equals("VARIABLE") && !id_type.equals("CTE_STRING") && !id_type.equals("STRING") && !id_type.equals("String")) throw new RuntimeException("Asignacion incompatible. El tipo de la variable " + sym_id.getName() + ": " + id_type + " no corresponde con el tipo de la expresion " + sym_strc.getName() + ": " + sym_strc.getType());
                        
                         symbolTable.updateVariableS(id, "String", sym_strc.getValue(), sym_strc.getLength()); 
 
@@ -300,7 +308,7 @@ factor ::= IDENTIFIER:id
                 | OPEN_BRACKET expression:exp CLOSE_BRACKET 
                     {: 
                         System.out.println("[FACTOR] ( Expression )"); 
-                        RESULT = "(" + exp + ")"; 
+                        RESULT = exp; 
                     :};
 
 condition ::= simple_condition
@@ -399,7 +407,7 @@ identifier_list ::= IDENTIFIER:id
 type_specifier ::= TYPE_INT 
                     {: 
                         System.out.println("[TYPE SPECIFIER] Type Integer" );
-                        RESULT = "Int"; 
+                        RESULT = "Integer"; 
                     :}
                 | TYPE_FLOAT 
                     {: 
