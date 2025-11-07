@@ -556,3 +556,4 @@ type_specifier ::= TYPE_INT
                         System.out.println("[TYPE SPECIFIER] Type String" );
                         RESULT = "String"; 
                     :};
+                    
