@@ -10,8 +10,9 @@ c := .9999
 
 d := "@sdADaSjfla%dfg"
 e := "asldk  fh sjf"
+ee := 9.9
 
-f:=d*(e - 21)/4
+f:=d*(ee - 21)/4
 
 init {
     a1, b1 : Float

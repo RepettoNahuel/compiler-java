@@ -124,8 +124,17 @@ statement ::= assignment
 
 assignment ::=  IDENTIFIER:id ASSIG expression:e
                     {: 
-                        String eStr = (String) e; 
+                        SymbolTableGenerator.Symbol sym_id = SymbolTableGenerator.getSymbol(id);
+                        String id_type = sym_id.getType();
+
+                        Map<String, Object> eMap = (Map<String, Object>) e;
+                        String eType = (String) eMap.get("type");
+                        String eStr = (String) eMap.get("value"); 
+
                         String aux = eStr; 
+
+                        if (!eType.equals(id_type) && !id_type.equals("VARIABLE")) throw new RuntimeException("Asignacion incompatibles: " + id_type + " = " + eType);
+ 
 
                         if (eStr.length() >= 2 && eStr.charAt(0) == '(' && eStr.charAt(eStr.length() - 1) == ')') { 
                             aux = eStr.substring(1, eStr.length() - 1); 
@@ -229,7 +238,7 @@ expression ::= expression:left PLUS term:right
                         String typeL = (String) l.get("type");
                         String typeR = (String) r.get("type");
 
-                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en suma: " + typeL + " * " + typeR);
+                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en suma: " + typeL + " + " + typeR);
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("ADD", l.get("value"), r.get("value"));
 
@@ -248,7 +257,7 @@ expression ::= expression:left PLUS term:right
                         String typeL = (String) l.get("type");
                         String typeR = (String) r.get("type");
 
-                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en resta: " + typeL + " * " + typeR);
+                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en resta: " + typeL + " - " + typeR);
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("SUB", l.get("value"), r.get("value"));
 
@@ -267,26 +276,48 @@ expression ::= expression:left PLUS term:right
                         System.out.println("[EXPRESSION] triangleAreaMaximum ( Triangle ; Triangle )");
                         Object t1_area = IntermediateCodeGenerator.addTerceto("AREA", t1, null);
                         Object t2_area = IntermediateCodeGenerator.addTerceto("AREA", t2, null);
-                        RESULT = IntermediateCodeGenerator.addTerceto("MAX", t1_area, t2_area);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("MAX", t1_area, t2_area);
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", "Float");
+                        RESULT = result;
                     :}
                 | EQUAL_EXPRESSIONS OPEN_BRACKET expression_list:el CLOSE_BRACKET
                     {: 
                         String res = lyc.compiler.files.ExpressionUtils.equalExpressions(el);
                         System.out.println("[EXPRESSION] equalExpressions ( Expression List ): " + el);
-                        RESULT = res;
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", res);
+                        result.put("type", "Bolean");
+                        RESULT = result;
                     :};
 
 triangle ::= OPEN_SQUARE_BRACKET point:p1 SEMI_COLON point:p2 SEMI_COLON point:p3 CLOSE_SQUARE_BRACKET 
                     {: 
                         System.out.println("[TRIANGLE] [point ; point ; point ]");
                         Object temp_tri = IntermediateCodeGenerator.addTerceto("TRI_P1_P2", p1, p2);
-                        RESULT = IntermediateCodeGenerator.addTerceto("TRIANGLE", temp_tri, p3);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("TRIANGLE", temp_tri, p3);
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", "Float");
+                        RESULT = result;
                     :};
 
 point ::= expression:x COMMA expression:y 
                     {: 
                         System.out.println("[POINT] Expression , Expression");
-                        RESULT = IntermediateCodeGenerator.addTerceto("POINT", x, y);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("POINT", x, y);
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", "Float");
+                        RESULT = result;
                     :};
 
 expression_list ::= expression:exp
@@ -333,7 +364,7 @@ term ::= term:left MULT factor:right
                         String typeL = (String) l.get("type");
                         String typeR = (String) r.get("type");
 
-                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en division: " + typeL + " * " + typeR);
+                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en division: " + typeL + " / " + typeR);
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("DIV", l.get("value"), r.get("value"));
 
