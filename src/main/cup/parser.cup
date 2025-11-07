@@ -144,7 +144,13 @@ assignment ::=  IDENTIFIER:id ASSIG expression:e
                         System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + aux); 
                         if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id); 
 
-                        IntermediateCodeGenerator.addTerceto("ASSIGN", id, aux); 
+                        String resultado = aux;
+
+                        if (eStr.length() >= 2 && eStr.charAt(0) == '[' && eStr.charAt(eStr.length() - 1) == ']') { 
+                            resultado = (String) IntermediateCodeGenerator.resolverTerceto(aux);
+                        }                                                 
+
+                        IntermediateCodeGenerator.addTerceto("ASSIGN", id, resultado); 
                         RESULT = aux; 
                     :}
                 |  IDENTIFIER:id ASSIG STRING_CONSTANT:strc
@@ -304,7 +310,7 @@ expression ::= expression:left PLUS term:right
 
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", res);
-                        result.put("type", "Bolean");
+                        result.put("type", "Boolean");
                         RESULT = result;
                     :};
 
@@ -556,4 +562,3 @@ type_specifier ::= TYPE_INT
                         System.out.println("[TYPE SPECIFIER] Type String" );
                         RESULT = "String"; 
                     :};
-                    
