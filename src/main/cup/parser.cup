@@ -3,6 +3,7 @@ package lyc.compiler;
 import java_cup.runtime.*;
 import lyc.compiler.files.SymbolTableGenerator;
 import lyc.compiler.files.IntermediateCodeGenerator;
+import java.util.*;
 
 class Parser;
 
@@ -221,12 +222,40 @@ write_statement ::= WRITE OPEN_BRACKET expression:exp CLOSE_BRACKET
 expression ::= expression:left PLUS term:right
                     {:
                         System.out.println("[EXPRESSION] Expresion + Term");
-                        RESULT = IntermediateCodeGenerator.addTerceto("ADD", left, right);
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en suma: " + typeL + " * " + typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("ADD", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", typeL);
+                        RESULT = result;
                     :}
                 | expression:left SUB term:right 
                     {: 
                         System.out.println("[EXPRESSION] Expresion - Term"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("SUB", left, right);
+                        
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en resta: " + typeL + " * " + typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("SUB", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", typeL);
+                        RESULT = result;
                     :}
                 | term:term
                     {: 
@@ -278,12 +307,40 @@ expression_list ::= expression:exp
 term ::= term:left MULT factor:right 
                     {: 
                         System.out.println("[TERM] Term * Factor"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("MULT", left, right);
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en multiplicacion: " + typeL + " * " + typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("MULT", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", typeL);
+                        RESULT = result;
                     :}
                 | term:left DIV factor:right 
                     {: 
                         System.out.println("[TERM] Term / Factor"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("DIV", left, right);
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en division: " + typeL + " * " + typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("DIV", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", typeL);
+                        RESULT = result;
                     :}
                 | factor:value 
                     {: 
@@ -294,16 +351,35 @@ term ::= term:left MULT factor:right
 factor ::= IDENTIFIER:id 
                     {: 
                         System.out.println("[FACTOR] Identificador: " + id);
-                        RESULT = id;
+
+                        SymbolTableGenerator.Symbol sym_id = SymbolTableGenerator.getSymbol(id);
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", id);
+                        result.put("type", sym_id.getType());
+                        RESULT = result;
+
                     :}
                 | INTEGER_CONSTANT:intc {: 
                         System.out.println("[FACTOR] Constante Entera: " + intc);
-                        RESULT = intc;
+                        
+                        SymbolTableGenerator.Symbol sym_intc = SymbolTableGenerator.getSymbol(intc);
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", intc);
+                        result.put("type", "Integer");
+                        RESULT = result;
                     :}
                 | FLOAT_CONSTANT:floatc 
                     {: 
                         System.out.println("[FACTOR] Constante Float: " + floatc);
-                        RESULT = floatc;
+                        
+                        SymbolTableGenerator.Symbol sym_floatc = SymbolTableGenerator.getSymbol(floatc);
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", floatc);
+                        result.put("type", "Float");
+                        RESULT = result;
                     :}
                 | OPEN_BRACKET expression:exp CLOSE_BRACKET 
                     {: 
