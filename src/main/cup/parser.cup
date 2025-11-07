@@ -96,9 +96,6 @@ non terminal type_specifier;
 non terminal triangle;
 non terminal point;
 non terminal Object expression_list;
-non terminal numeric_expression;
-non terminal numeric_term;
-non terminal numeric_factor;
 
 // ----------------------------------------------------
 // Start Symbol
@@ -249,9 +246,9 @@ triangle ::= OPEN_SQUARE_BRACKET point:p1 SEMI_COLON point:p2 SEMI_COLON point:p
                         RESULT = IntermediateCodeGenerator.addTerceto("TRIANGLE", temp_tri, p3);
                     :};
 
-point ::= numeric_expression:x COMMA numeric_expression:y 
+point ::= expression:x COMMA expression:y 
                     {: 
-                        System.out.println("[POINT] Numeric Expression , Numeric Expression");
+                        System.out.println("[POINT] Expression , Expression");
                         RESULT = IntermediateCodeGenerator.addTerceto("POINT", x, y);
                     :};
 
@@ -306,60 +303,6 @@ factor ::= IDENTIFIER:id
                         RESULT = "(" + exp + ")"; 
                     :};
 
-// Numeric-only expressions
-numeric_expression ::= numeric_expression:left PLUS numeric_term:right 
-                    {: 
-                        System.out.println("[NUMERIC EXPRESSION] Numeric Expression + Numeric Term");
-                        RESULT = IntermediateCodeGenerator.addTerceto("ADD", left, right);
-                    :}
-                | numeric_expression:left SUB numeric_term:right 
-                    {: 
-                        System.out.println("[NUMERIC EXPRESSION] Numeric Expression - Numeric Term");
-                        RESULT = IntermediateCodeGenerator.addTerceto("SUB", left, right);
-                    :}
-                | numeric_term:term 
-                    {: 
-                        System.out.println("[NUMERIC EXPRESSION] Numeric Term");
-                        RESULT = term; 
-                    :};
-
-numeric_term ::= numeric_term:left MULT numeric_factor:right 
-                    {: 
-                        System.out.println("[NUMERIC TERM] Numeric Term * Numeric Factor");
-                        RESULT = IntermediateCodeGenerator.addTerceto("MULT", left, right);
-                    :}
-                | numeric_term:left DIV numeric_factor:right 
-                    {: 
-                        System.out.println("[NUMERIC TERM] Numeric Term / Numeric Factor");
-                        RESULT = IntermediateCodeGenerator.addTerceto("DIV", left, right);
-                    :}
-                | numeric_factor:value 
-                    {: 
-                        System.out.println("[NUMERIC TERM] Numeric Factor");
-                        RESULT = value; 
-                    :};
-
-numeric_factor ::= IDENTIFIER:id 
-                    {: 
-                        System.out.println("[NUMERIC FACTOR] Identifier: " + id);
-                        RESULT = id; 
-                    :}
-                | INTEGER_CONSTANT:intc 
-                    {: 
-                        System.out.println("[NUMERIC FACTOR]  Integer Constant: " + intc);
-                        RESULT = intc; 
-                    :}
-                | FLOAT_CONSTANT:floatc 
-                    {: 
-                        System.out.println("[NUMERIC FACTOR] Float Constant: " + floatc);
-                        RESULT = floatc; 
-                    :}
-                | OPEN_BRACKET numeric_expression:exp CLOSE_BRACKET 
-                    {: 
-                        System.out.println("[NUMERIC FACTOR] Numeric Expression: " + exp);
-                        RESULT = exp; 
-                    :};
-
 condition ::= simple_condition
                 | NOT simple_condition 
                     {: 
@@ -370,32 +313,32 @@ condition ::= simple_condition
                         System.out.println("[CONDITION] Compound Condition"); 
                     :};
 
-simple_condition ::= numeric_expression:left LESS numeric_expression:right
+simple_condition ::= expression:left LESS expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression < Expression"); 
                         RESULT = IntermediateCodeGenerator.addTerceto("LESS", left, right);
                     :}
-                | numeric_expression:left GREATER numeric_expression:right
+                | expression:left GREATER expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression > Expression"); 
                         RESULT = IntermediateCodeGenerator.addTerceto("GREATER", left, right);
                     :}
-                | numeric_expression:left EQUAL numeric_expression:right
+                | expression:left EQUAL expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression == Expression");
                         RESULT = IntermediateCodeGenerator.addTerceto("EQUAL", left, right);
                     :}
-                | numeric_expression:left NOT_EQUAL numeric_expression:right
+                | expression:left NOT_EQUAL expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression != Expression"); 
                         RESULT = IntermediateCodeGenerator.addTerceto("NOT_EQUAL", left, right);
                     :}
-                | numeric_expression:left LESS_EQUAL numeric_expression:right
+                | expression:left LESS_EQUAL expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression <= Expression"); 
                         RESULT = IntermediateCodeGenerator.addTerceto("LESS_EQUAL", left, right);
                     :}
-                | numeric_expression:left GREATER_EQUAL numeric_expression:right
+                | expression:left GREATER_EQUAL expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression >= Expression"); 
                         RESULT = IntermediateCodeGenerator.addTerceto("GREATER_EQUAL", left, right);
