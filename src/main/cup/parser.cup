@@ -134,7 +134,8 @@ assignment ::=  IDENTIFIER:id ASSIG expression:e
                         String aux = eStr; 
 
                         if (!eType.equals(id_type) && !id_type.equals("VARIABLE")) throw new RuntimeException("Asignacion incompatibles: " + id_type + " = " + eType);
- 
+
+                        symbolTable.updateVariableS(id, eType, "", 0); 
 
                         if (eStr.length() >= 2 && eStr.charAt(0) == '(' && eStr.charAt(eStr.length() - 1) == ')') { 
                             aux = eStr.substring(1, eStr.length() - 1); 
@@ -238,13 +239,19 @@ expression ::= expression:left PLUS term:right
                         String typeL = (String) l.get("type");
                         String typeR = (String) r.get("type");
 
-                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en suma: " + typeL + " + " + typeR);
+                        if ((!typeL.equals("Integer") && !typeL.equals("Float")) || (!typeR.equals("Integer") && !typeR.equals("Float")) ) throw new RuntimeException("Tipos incompatibles en suma: " + typeL + " + " + typeR + ". Operacion solo valida para Integer y Float.");
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("ADD", l.get("value"), r.get("value"));
 
+                        String newType = "Integer";
+                        if (typeL.equals("Float") || typeR.equals("Float"))
+                        {
+                            newType = "Float";      
+                        }
+
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", terceto);
-                        result.put("type", typeL);
+                        result.put("type", newType);
                         RESULT = result;
                     :}
                 | expression:left SUB term:right 
@@ -257,13 +264,19 @@ expression ::= expression:left PLUS term:right
                         String typeL = (String) l.get("type");
                         String typeR = (String) r.get("type");
 
-                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en resta: " + typeL + " - " + typeR);
+                        if ((!typeL.equals("Integer") && !typeL.equals("Float")) || (!typeR.equals("Integer") && !typeR.equals("Float")) ) throw new RuntimeException("Tipos incompatibles en resta: " + typeL + " - " + typeR + ". Operacion solo valida para Integer y Float.");
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("SUB", l.get("value"), r.get("value"));
 
+                        String newType = "Integer";
+                        if (typeL.equals("Float") || typeR.equals("Float"))
+                        {
+                            newType = "Float";      
+                        }
+
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", terceto);
-                        result.put("type", typeL);
+                        result.put("type", newType);
                         RESULT = result;
                     :}
                 | term:term
@@ -345,13 +358,19 @@ term ::= term:left MULT factor:right
                         String typeL = (String) l.get("type");
                         String typeR = (String) r.get("type");
 
-                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en multiplicacion: " + typeL + " * " + typeR);
+                        if ((!typeL.equals("Integer") && !typeL.equals("Float")) || (!typeR.equals("Integer") && !typeR.equals("Float")) ) throw new RuntimeException("Tipos incompatibles en producto: " + typeL + " * " + typeR + ". Operacion solo valida para Integer y Float.");
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("MULT", l.get("value"), r.get("value"));
 
+                        String newType = "Integer";
+                        if (typeL.equals("Float") || typeR.equals("Float"))
+                        {
+                            newType = "Float";      
+                        }
+
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", terceto);
-                        result.put("type", typeL);
+                        result.put("type", newType);
                         RESULT = result;
                     :}
                 | term:left DIV factor:right 
@@ -364,13 +383,19 @@ term ::= term:left MULT factor:right
                         String typeL = (String) l.get("type");
                         String typeR = (String) r.get("type");
 
-                        if (!typeL.equals(typeR)) throw new RuntimeException("Tipos incompatibles en division: " + typeL + " / " + typeR);
+                        if ((!typeL.equals("Integer") && !typeL.equals("Float")) || (!typeR.equals("Integer") && !typeR.equals("Float")) ) throw new RuntimeException("Tipos incompatibles en division: " + typeL + " / " + typeR + ". Operacion solo valida para Integer y Float.");
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("DIV", l.get("value"), r.get("value"));
 
+                        String newType = "Integer";
+                        if (typeL.equals("Float") || typeR.equals("Float"))
+                        {
+                            newType = "Float";      
+                        }
+
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", terceto);
-                        result.put("type", typeL);
+                        result.put("type", newType);
                         RESULT = result;
                     :}
                 | factor:value 
@@ -393,8 +418,6 @@ factor ::= IDENTIFIER:id
                     :}
                 | INTEGER_CONSTANT:intc {: 
                         System.out.println("[FACTOR] Constante Entera: " + intc);
-                        
-                        SymbolTableGenerator.Symbol sym_intc = SymbolTableGenerator.getSymbol(intc);
 
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", intc);
@@ -404,14 +427,21 @@ factor ::= IDENTIFIER:id
                 | FLOAT_CONSTANT:floatc 
                     {: 
                         System.out.println("[FACTOR] Constante Float: " + floatc);
-                        
-                        SymbolTableGenerator.Symbol sym_floatc = SymbolTableGenerator.getSymbol(floatc);
 
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", floatc);
                         result.put("type", "Float");
                         RESULT = result;
                     :}
+                | BOOLEAN_CONSTANT:boolc
+                {:
+                    System.out.println("[FACTOR] Constante Booleana: " + boolc);
+
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("value", boolc);
+                    result.put("type", "Boolean");
+                    RESULT = result;
+                :}    
                 | OPEN_BRACKET expression:exp CLOSE_BRACKET 
                     {: 
                         System.out.println("[FACTOR] ( Expression )"); 

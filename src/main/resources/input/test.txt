@@ -1,18 +1,18 @@
 z := 2
 x := 3.8
-a := -4
+a := -4.1
 
 areaMax := triangleAreaMaximum( [0,x; 4.0,12; 2.5,3] ; [x,0; 6,0; z,2] ) 
 
 a := 99999.99
-b := 99.
+b := 99
 c := .9999
 
 d := "@sdADaSjfla%dfg"
 e := "asldk  fh sjf"
 ee := 9.9
 
-f:=d*(ee - 21)/4
+f:=c*(ee - 21)/4
 
 init {
     a1, b1 : Float
@@ -28,10 +28,10 @@ read(base)
 write("ewr")
 write(var1)
 
-a1 := 1 
+a1 := 1.1 
 b := 2
-c := 3
-d := 4
+c := 3.3
+d := "anitalavalatina"
 
 
 if (not a > b)
@@ -75,7 +75,7 @@ while (a > b)
     a := a - 1
 }
 
-a := 2
+a := 2.2
 b := 3
 y := true
 EqualTrue := equalExpressions(a + b, 5, b * 2, 3 + 2, a + b)
