@@ -114,12 +114,12 @@ public class SymbolTableGenerator implements FileGenerator{
         return symbol != null ? new String[]{symbol.getName(), symbol.getValue(), symbol.getType(), String.valueOf(symbol.getLength())} : null;
     }
 
-    public static void updateVariableS(String name, String newType, String newValue, String newLength) {
+    public static void updateVariableS(String name, String newType, String newValue, Integer newLength) {
         if (newType == null) return;   
         Symbol symbol = symbolTable.get(name);
         symbol.setType(newType);
         symbol.setValue(newValue);
-        symbol.setLength(Integer.parseInt(newLength));
+        symbol.setLength(newLength);
         symbolTable.put(name, symbol);
     }
 

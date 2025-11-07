@@ -138,11 +138,11 @@ assignment ::=  IDENTIFIER:id ASSIG expression:e
                         SymbolTableGenerator.Symbol sym_id = SymbolTableGenerator.getSymbol(id);
                         SymbolTableGenerator.Symbol sym_strc = SymbolTableGenerator.getSymbol(strc);
 
-                        if (sym_id == null) throw new RuntimeException("La variable: "+ id + " no ha sido declarada.");
-
                         String id_type = sym_id.getType();
                         if (id_type != "VARIABLE" && id_type != "CTE_STRING" && id_type != "STRING" && id_type != "String") throw new RuntimeException("Asignacion incompatible. El tipo de la variable " + sym_id.getName() + ": " + id_type + " no corresponde con el tipo de la expresion " + sym_strc.getName() + ": " + sym_strc.getType());
                        
+                        symbolTable.updateVariableS(id, "String", sym_strc.getValue(), sym_strc.getLength()); 
+
                         IntermediateCodeGenerator.addTerceto("ASSIGN", id, strc);
                         RESULT = strc;
                     :};
