@@ -327,26 +327,40 @@ expression ::= expression:left PLUS term:right
                     :}
                 | EQUAL_EXPRESSIONS OPEN_BRACKET expression_list:el CLOSE_BRACKET
                     {: 
-                        System.out.println("[EXPRESSION] equalExpressions ( Expression List ): " + el);
                         Map<String, Object> expressionList = (Map<String, Object>) el;
-                        String res = lyc.compiler.files.ExpressionUtils.equalExpressions(expressionList.get("value"));
-                        java.util.List<Map<String, Object>> tmp = (java.util.List<Map<String, Object>>) expressionList.get("list");
+                        java.util.List<Map<String, Object>> tmp = (java.util.List<Map<String, Object>>) expressionList.get("value");
+                        
                         if (tmp == null || tmp.size() < 2) {
                             throw new RuntimeException("equalExpressions requiere al menos dos expresiones.");
                         }
 
                         String lista = "";
                         String newValor = "";
+                        java.util.List<Double> valoresEvaluados = new java.util.ArrayList<>();
 
                         for (Object item : tmp) {
-
                             Map<String, Object> itemList = (Map<String, Object>) item;
-
                             newValor = (String) itemList.get("value");
 
+                            // Si es un terceto, lo resolvemos
                             if (newValor.length() >= 2 && newValor.charAt(0) == '[' && newValor.charAt(newValor.length() - 1) == ']') { 
                                 IntermediateCodeGenerator.ResultadoTerceto vall = IntermediateCodeGenerator.resolverTerceto(newValor); 
                                 newValor = vall.expresion;
+
+                                try {
+                                    valoresEvaluados.add(Double.parseDouble(String.valueOf(vall.valor)));
+                                } catch (NumberFormatException ex) {
+                                    // Si no se puede convertir, no lo agregamos
+                                    System.out.println("No se pudo convertir valor de terceto a número: " + vall.valor);
+                                }
+                            }
+
+                            else {
+                                try {
+                                    valoresEvaluados.add(Double.parseDouble(newValor));
+                                } catch (NumberFormatException ex) {
+                                    System.out.println("No se pudo convertir literal a número: " + newValor);
+                                }
                             }
 
                             if (lista.equals("")){
@@ -356,7 +370,7 @@ expression ::= expression:left PLUS term:right
                                 lista = lista + ", " + newValor;
                             }
                         }
-
+                /*
                         List<String> beList = new ArrayList<>();
                         for (int i = 0; i < tmp.size(); i++) {
                             for (int j = i + 1; j < tmp.size(); j++) {
@@ -367,7 +381,7 @@ expression ::= expression:left PLUS term:right
                                 // Obtengo los valores reales de cada expresión
                                 String left = (String) leftMap.get("value");
                                 String right = (String) rightMap.get("value");
-
+                */
                                 // Si los valores son tercetos ("[1]"), lo resolvemos? En caso de SI, descomentar
                                 /*
                                 if (left.length() >= 2 && left.charAt(0) == '[' && left.charAt(left.length() - 1) == ']') {
@@ -381,7 +395,7 @@ expression ::= expression:left PLUS term:right
                                 }*/
 
                                 // Genero CMP
-                                IntermediateCodeGenerator.addTerceto("CMP", left, right);
+                /*              IntermediateCodeGenerator.addTerceto("CMP", left, right);
 
                                 // Genero BE con salto pendiente
                                 String beIndex = IntermediateCodeGenerator.addTerceto("BE", null, null);
@@ -393,14 +407,18 @@ expression ::= expression:left PLUS term:right
                             int TercetoPendiente = Integer.parseInt(beIndex.replace("[", "").replace("]", ""));
                             IntermediateCodeGenerator.completarSalto(TercetoPendiente, IntermediateCodeGenerator.getNextIndex());
                         }
-
+                */
 
                         lista = lista + ")";
 
                         System.out.println("[EXPRESSION] equalExpressions ( Expression List ): " + lista);
 
+                        //Verificar si hay valores repetidos
+                        java.util.Set<Double> conjuntoUnico = new java.util.HashSet<>(valoresEvaluados);
+                        boolean hayRepetidos = (conjuntoUnico.size() < valoresEvaluados.size());
+
                         Map<String, Object> result = new HashMap<>();
-                        result.put("value", res);
+                        result.put("value", hayRepetidos ? "True" : "False");
                         result.put("type", "Boolean");
                         RESULT = result;
                     :};
@@ -452,46 +470,30 @@ point ::= expression:x COMMA expression:y
 expression_list ::= expression:exp
                     {: 
                         System.out.println("[EXPRESSION LIST] Expression");
-                        Map<String, Object> expression = (Map<String, Object>) exp;
-                        String typeExpression = (String) expression.get("type");
+                        java.util.ArrayList<Map<String, Object>> list = new java.util.ArrayList<>();
+                        list.add((Map<String, Object>)exp);
 
-                        java.util.List<Map<String, Object>> list = (java.util.List<Map<String, Object>>) expression.get("list");
-                        if (list == null) {
-                            list = new java.util.ArrayList<>();
-                        }
-
-                        Map<String, Object> expMap = new HashMap<>();
-                        expMap.put("value", expression.get("value"));
-                        expMap.put("type", typeExpression);
-                        list.add(expMap);
+                        Map<String, Object> expp = (Map<String, Object>) exp;
+                        String typeExpression = (String) expp.get("type");
 
                         Map<String, Object> result = new HashMap<>();
-                        result.put("value", expression.get("value"));
+                        result.put("value", list);
                         result.put("type", typeExpression);
-                        result.put("list", list);
 
                         RESULT = result;
                     :}
                 | expression_list:elist COMMA expression:exp
                     {: 
                         System.out.println("[EXPRESSION LIST] Expression List , Expression");
-                        Map<String, Object> expression = (Map<String, Object>) exp;
-                        Map<String, Object> expressionList = (Map<String, Object>) elist;
-                        String typeExpression = (String) expression.get("type");
 
-                        java.util.List<Map<String, Object>> list = (java.util.List<Map<String, Object>>) expressionList.get("list");
-                        if (list == null) {
-                            list = new java.util.ArrayList<>();
-                        }
-                        Map<String, Object> expMap = new HashMap<>();
-                        expMap.put("value", expression.get("value"));
-                        expMap.put("type", typeExpression);
-                        list.add(expMap);
+                        Map<String, Object> expressionList = (Map<String, Object>) elist;
+                        java.util.ArrayList<Map<String, Object>> list = (java.util.ArrayList<Map<String, Object>>) expressionList.get("value");
+                        list.add((Map<String, Object>)exp);
 
                         Map<String, Object> result = new HashMap<>();
-                        result.put("value", expression.get("value"));
-                        result.put("type", typeExpression);
-                        result.put("list", list);
+                        result.put("value", list);
+                        result.put("type", expressionList.get("type"));
+
                         RESULT = result;
                     :};
 
