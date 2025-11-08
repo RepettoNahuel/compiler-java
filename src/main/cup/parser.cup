@@ -3,11 +3,13 @@ package lyc.compiler;
 import java_cup.runtime.*;
 import lyc.compiler.files.SymbolTableGenerator;
 import lyc.compiler.files.IntermediateCodeGenerator;
+import java.util.Stack;
 
 class Parser;
 
 parser code {:
     private final SymbolTableGenerator symbolTable = new SymbolTableGenerator();
+    private Stack<Integer> jumpStack = new Stack<>();
 :}
 
 /*** Elementos Terminales ***/
@@ -141,18 +143,25 @@ assignment ::=  IDENTIFIER:id ASSIG expression:e
 
 if_statement ::=
                 IF OPEN_BRACKET condition:c CLOSE_BRACKET
-                    {:
+                    /*{:
                         IntermediateCodeGenerator.addTerceto("IF_FALSE", "[" + IntermediateCodeGenerator.getLastIndex() + "]", "[PENDIENTE]");
                         IntermediateCodeGenerator.pushSalto(IntermediateCodeGenerator.getLastIndex());  // guado indice
-                    :}
+                    :}*/
                 OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET
                 else_clause
                     {:
+                        if(!jumpStack.isEmpty()){
+                            int index = jumpStack.pop();
+                            int finElse = IntermediateCodeGenerator.getNextIndex();
+                            IntermediateCodeGenerator.completarSaltoCmp(index, finElse);
+                        }
+                    /*
                         if (!IntermediateCodeGenerator.isSaltoEmpty()) {
                             int tercetoPendiente = IntermediateCodeGenerator.popSalto();    
                             int finIfElse = IntermediateCodeGenerator.getNextIndex();
                             IntermediateCodeGenerator.completarSalto(tercetoPendiente, finIfElse);  
                         }
+                        */
                     :};
 
 else_clause ::= /* vacío */
@@ -355,7 +364,8 @@ numeric_factor ::= IDENTIFIER:id
 condition ::= simple_condition
                 | NOT simple_condition 
                     {: 
-                        System.out.println("[CONDITION] NOT Simple Condition"); 
+                        System.out.println("[CONDITION] NOT Simple Condition");
+                        IntermediateCodeGenerator.flipJumpOperator();
                     :}
                 | compound_condition 
                     {: 
@@ -364,33 +374,51 @@ condition ::= simple_condition
 
 simple_condition ::= numeric_expression:left LESS numeric_expression:right
                     {: 
-                        System.out.println("[SIMPLE CONDITION] Expression < Expression"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("LESS", left, right);
+                        System.out.println("[SIMPLE CONDITION] Expression < Expression");
+                        IntermediateCodeGenerator.addTerceto("CMP", left, right);
+                        RESULT = IntermediateCodeGenerator.addTerceto("BGE", "[PENDIENTE]", null);
+                        int index = IntermediateCodeGenerator.getLastIndex();
+                        jumpStack.push(index);
                     :}
                 | numeric_expression:left GREATER numeric_expression:right
                     {: 
-                        System.out.println("[SIMPLE CONDITION] Expression > Expression"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("GREATER", left, right);
+                        System.out.println("[SIMPLE CONDITION] Expression > Expression");
+                        IntermediateCodeGenerator.addTerceto("CMP", left, right);
+                        RESULT = IntermediateCodeGenerator.addTerceto("BLE", "[PENDIENTE]", null);
+                        int index = IntermediateCodeGenerator.getLastIndex();
+                        jumpStack.push(index);
                     :}
                 | numeric_expression:left EQUAL numeric_expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression == Expression");
-                        RESULT = IntermediateCodeGenerator.addTerceto("EQUAL", left, right);
+                        IntermediateCodeGenerator.addTerceto("CMP", left, right);
+                        RESULT = IntermediateCodeGenerator.addTerceto("BNE", "[PENDIENTE]", null);
+                        int index = IntermediateCodeGenerator.getLastIndex();
+                        jumpStack.push(index);
                     :}
                 | numeric_expression:left NOT_EQUAL numeric_expression:right
                     {: 
-                        System.out.println("[SIMPLE CONDITION] Expression != Expression"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("NOT_EQUAL", left, right);
+                        System.out.println("[SIMPLE CONDITION] Expression != Expression");
+                        IntermediateCodeGenerator.addTerceto("CMP", left, right); 
+                        RESULT = IntermediateCodeGenerator.addTerceto("BEQ", "[PENDIENTE]", null);
+                        int index = IntermediateCodeGenerator.getLastIndex();
+                        jumpStack.push(index);
                     :}
                 | numeric_expression:left LESS_EQUAL numeric_expression:right
                     {: 
-                        System.out.println("[SIMPLE CONDITION] Expression <= Expression"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("LESS_EQUAL", left, right);
+                        System.out.println("[SIMPLE CONDITION] Expression <= Expression");
+                        IntermediateCodeGenerator.addTerceto("CMP", left, right); 
+                        RESULT = IntermediateCodeGenerator.addTerceto("BGT", "[PENDIENTE]", null);
+                        int index = IntermediateCodeGenerator.getLastIndex();
+                        jumpStack.push(index);
                     :}
                 | numeric_expression:left GREATER_EQUAL numeric_expression:right
                     {: 
-                        System.out.println("[SIMPLE CONDITION] Expression >= Expression"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("GREATER_EQUAL", left, right);
+                        System.out.println("[SIMPLE CONDITION] Expression >= Expression");
+                        IntermediateCodeGenerator.addTerceto("CMP", left, right); 
+                        RESULT = IntermediateCodeGenerator.addTerceto("BLT", "[PENDIENTE]", null);
+                        int index = IntermediateCodeGenerator.getLastIndex();
+                        jumpStack.push(index);
                     :};
 
 compound_condition ::= simple_condition:left AND simple_condition:right 

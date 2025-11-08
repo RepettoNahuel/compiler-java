@@ -8,6 +8,15 @@ import java.util.Stack;
 
 public class IntermediateCodeGenerator implements FileGenerator {
 
+    private static final Map<String, String> FlipJumpOperatorMap = Map.of(
+        "BGE", "BLT",
+        "BLT", "BGE",
+        "BLE", "BGT",
+        "BGT", "BLE",
+        "BNE", "BEQ",
+        "BEQ", "BNE"
+    );
+
     private static final Map<Integer, String[]> tercetosMap = new HashMap<>();
     private static int tercNumber = 0;
     private static final Stack<Integer> pilaSaltos = new Stack<>();
@@ -37,6 +46,26 @@ public class IntermediateCodeGenerator implements FileGenerator {
         String[] terceto = tercetosMap.get(index);
         if (terceto != null) {
             terceto[2] = "[" + destino + "]";
+        }
+    }
+
+    public static void completarSaltoCmp(int index, int destino) {
+        String[] terceto = tercetosMap.get(index);
+        if (terceto != null) {
+            terceto[1] = "[" + destino + "]";
+        }
+    }
+
+    public static void flipJumpOperator(){
+        int index = getLastIndex();
+        String[] terceto = tercetosMap.get(index);
+        if (terceto != null){
+            String currentOperator = terceto[0];
+            String flippedOp = FlipJumpOperatorMap.get(currentOperator);
+
+            if (flippedOp != null) {
+                terceto[0] = flippedOp;
+            }
         }
     }
 
