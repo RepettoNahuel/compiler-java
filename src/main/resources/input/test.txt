@@ -34,6 +34,7 @@ a1 := 1.1
 b := 2
 c := 3.3
 d := "anitalavalatina"
+l := 8
 
 
 if (not a > b)
@@ -55,9 +56,9 @@ if (b > a)
 {
     if(c > b)
     {
-        if(d > c)
+        if(l > c)
         {
-            write ("D ES SUPERIOR A TODO")
+            write ("l ES SUPERIOR A TODO")
         }
         else
         {
