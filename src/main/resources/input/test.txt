@@ -24,6 +24,8 @@ yy := (a + b)
 
 base := "Nahue salame"
 
+var1 := "Setear Variable"
+
 read(base)
 write("ewr")
 write(var1)
