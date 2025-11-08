@@ -315,16 +315,284 @@ expression ::= expression:left PLUS term:right
                         Map<String, Object> triangle1 = (Map<String, Object>) t1;
                         Map<String, Object> triangle2 = (Map<String, Object>) t2;
 
-                        Object t1_area = IntermediateCodeGenerator.addTerceto("AREA", triangle1.get("value"), null);
-                        Object t2_area = IntermediateCodeGenerator.addTerceto("AREA", triangle2.get("value"), null);
+                        float maximo;
+                        float areaAux = 0;
+                        float intermedio = 0;
+                        float valor1 = 0;
+                        float valor2 = 0;
 
-                        Object terceto = IntermediateCodeGenerator.addTerceto("MAX", t1_area, t2_area);
+                        //Triangulo1
+                        Map<String, Object> point11 = (Map<String, Object>) triangle1.get("p1");
+                        Map<String, Object> point12 = (Map<String, Object>) triangle1.get("p2");
+                        Map<String, Object> point13 = (Map<String, Object>) triangle1.get("p3");
 
-                        System.out.println(triangle1.get("value"));
-                        System.out.println(triangle2.get("value"));
+                        IntermediateCodeGenerator.DetalleTerceto pp11 = IntermediateCodeGenerator.getTerceto(point11.get("value").toString());
+                        IntermediateCodeGenerator.DetalleTerceto pp12 = IntermediateCodeGenerator.getTerceto(point12.get("value").toString());
+                        IntermediateCodeGenerator.DetalleTerceto pp13 = IntermediateCodeGenerator.getTerceto(point13.get("value").toString());
 
+                        Object temp_tr1 = IntermediateCodeGenerator.addTerceto("SUB", pp12.arg2, pp13.arg2);                        
+
+                        SymbolTableGenerator.Symbol sym_aux = SymbolTableGenerator.getSymbol(pp12.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp12.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp13.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp13.arg2);
+                        }
+                            
+                        areaAux = valor1 - valor2;
+
+                        Object temp_tr2 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr1, pp11.arg1);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp11.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp11.arg1);
+                        }
+
+                        areaAux = areaAux * valor1;
+
+                        Object temp_tr3 = IntermediateCodeGenerator.addTerceto("SUB", pp13.arg2, pp11.arg2);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp13.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp13.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp11.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp11.arg2);
+                        }
+                            
+                        intermedio = valor1 - valor2;
+
+                        Object temp_tr4 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr3, pp12.arg1);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp12.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp12.arg1);
+                        }
+
+                        intermedio = intermedio * valor1;                        
+
+                        Object temp_tr5 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr2, temp_tr4);
+
+                        areaAux = areaAux + intermedio;
+
+                        Object temp_tr6 = IntermediateCodeGenerator.addTerceto("SUB", pp11.arg2, pp12.arg2);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp11.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp11.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp12.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp12.arg2);
+                        }
+                            
+                        intermedio = valor1 - valor2;
+
+                        Object temp_tr7 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr6, pp13.arg1);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp13.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp13.arg1);
+                        }
+
+                        intermedio = intermedio * valor1; 
+
+                        Object temp_tr8 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr5, temp_tr7);
+
+                        areaAux = areaAux + intermedio;
+
+                        Object temp_tr9 = IntermediateCodeGenerator.addTerceto("DIV", temp_tr8, "2");
+
+                        areaAux = Math.abs(areaAux) / 2;
+                        maximo = areaAux;
+
+                        SymbolTableGenerator.insertVariable("@areaMax", String.valueOf(maximo), "Float");
+
+                        Object temp_tr10 = IntermediateCodeGenerator.addTerceto("ASSIGN", "@areaMax", temp_tr9);
+
+                        //Triangulo2
+                        Map<String, Object> point21 = (Map<String, Object>) triangle2.get("p1");
+                        Map<String, Object> point22 = (Map<String, Object>) triangle2.get("p2");
+                        Map<String, Object> point23 = (Map<String, Object>) triangle2.get("p3");
+
+                        IntermediateCodeGenerator.DetalleTerceto pp21 = IntermediateCodeGenerator.getTerceto(point21.get("value").toString());
+                        IntermediateCodeGenerator.DetalleTerceto pp22 = IntermediateCodeGenerator.getTerceto(point22.get("value").toString());
+                        IntermediateCodeGenerator.DetalleTerceto pp23 = IntermediateCodeGenerator.getTerceto(point23.get("value").toString());
+
+                        Object temp_tr21 = IntermediateCodeGenerator.addTerceto("SUB", pp22.arg2, pp23.arg2);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp22.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp22.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp23.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp23.arg2);
+                        }
+                            
+                        areaAux = valor1 - valor2;
+
+                        Object temp_tr22 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr21, pp21.arg1);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp21.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp21.arg1);
+                        }
+
+                        areaAux = areaAux * valor1;
+
+                        Object temp_tr23 = IntermediateCodeGenerator.addTerceto("SUB", pp23.arg2, pp21.arg2);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp23.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp23.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp21.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp21.arg2);
+                        }
+                            
+                        intermedio = valor1 - valor2;
+
+                        Object temp_tr24 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr23, pp22.arg1);
+                        
+                        sym_aux = SymbolTableGenerator.getSymbol(pp22.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp22.arg1);
+                        }
+
+                        intermedio = intermedio * valor1;  
+
+                        Object temp_tr25 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr22, temp_tr24);
+
+                        areaAux = areaAux + intermedio;
+
+                        Object temp_tr26 = IntermediateCodeGenerator.addTerceto("SUB", pp21.arg2, pp22.arg2);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp21.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp21.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp22.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp22.arg2);
+                        }
+                            
+                        intermedio = valor1 - valor2;
+
+                        Object temp_tr27 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr26, pp23.arg1);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp23.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp23.arg1);
+                        }
+
+                        intermedio = intermedio * valor1; 
+
+                        Object temp_tr28 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr25, temp_tr27);
+
+                        areaAux = areaAux + intermedio;
+
+                        Object temp_tr29 = IntermediateCodeGenerator.addTerceto("DIV", temp_tr28, "2");
+
+                        areaAux = Math.abs(areaAux) / 2;
+
+                        Object temp_tr210 = IntermediateCodeGenerator.addTerceto("CMP", temp_tr29, temp_tr9);
+
+                        int salto = IntermediateCodeGenerator.getNextIndex() + 1;
+
+                        Object temp_tr211 = IntermediateCodeGenerator.addTerceto("BLE", "[" + salto + "]", "");
+
+                        Object temp_tr212 = IntermediateCodeGenerator.addTerceto("ASSIGN", "@areaMax", temp_tr29);
+
+                        if (areaAux > maximo){
+                            maximo = areaAux;
+                            SymbolTableGenerator.insertVariable("@areaMax", String.valueOf(maximo), "Float");
+                        } 
+                       
                         Map<String, Object> result = new HashMap<>();
-                        result.put("value", "5.5");
+                        result.put("value", "@areaMax");
                         result.put("type", "Float");
                         RESULT = result;
                     :}
@@ -431,42 +699,13 @@ expression ::= expression:left PLUS term:right
 
 triangle ::= OPEN_SQUARE_BRACKET point:p1 SEMI_COLON point:p2 SEMI_COLON point:p3 CLOSE_SQUARE_BRACKET 
                     {: 
-                        Map<String, Object> point1 = (Map<String, Object>) p1;
-                        Map<String, Object> point2 = (Map<String, Object>) p2;
-                        Map<String, Object> point3 = (Map<String, Object>) p3;
-
                         System.out.println("[TRIANGLE] [point ; point ; point ]");
-                        //Object temp_tri = IntermediateCodeGenerator.addTerceto("TRI_P1_P2", point1.get("value"), point2.get("value"));
-                        //Object terceto = IntermediateCodeGenerator.addTerceto("POINT", temp_tri, point3.get("value"));
-
-                        IntermediateCodeGenerator.DetalleTerceto pp1 = IntermediateCodeGenerator.getTerceto(point1.get("value").toString());
-                        IntermediateCodeGenerator.DetalleTerceto pp2 = IntermediateCodeGenerator.getTerceto(point2.get("value").toString());
-                        IntermediateCodeGenerator.DetalleTerceto pp3 = IntermediateCodeGenerator.getTerceto(point3.get("value").toString());
-
-                        Object temp_tr1 = IntermediateCodeGenerator.addTerceto("SUB", pp2.arg2, pp3.arg2);
-                        Object temp_tr2 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr1, pp1.arg1);
-
-                        Object temp_tr3 = IntermediateCodeGenerator.addTerceto("SUB", pp3.arg2, pp1.arg2);
-                        Object temp_tr4 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr3, pp2.arg1);
-
-                        Object temp_tr5 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr2, temp_tr4);
-
-                        Object temp_tr6 = IntermediateCodeGenerator.addTerceto("SUB", pp1.arg2, pp2.arg2);
-                        Object temp_tr7 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr6, pp3.arg1);
-
-                        Object temp_tr8 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr5, temp_tr7);
-
-                        Object temp_tr9 = IntermediateCodeGenerator.addTerceto("DIV", temp_tr8, "2");
-
-                        Object temp_tr10 = IntermediateCodeGenerator.addTerceto("ASSIGN", "AREA", temp_tr9);
-
-                        //System.out.println(pp1.index + " " + pp1.operador + " " + pp1.arg1 + " " + pp1.arg2);
-                        //System.out.println(pp2.index + " " + pp2.operador + " " + pp2.arg1 + " " + pp2.arg2);
-                        //System.out.println(pp3.index + " " + pp3.operador + " " + pp3.arg1 + " " + pp3.arg2);
 
                         Map<String, Object> result = new HashMap<>();
-                        result.put("value", 5);         //reemplazar pór valor de area
-                        result.put("type", "triangle");
+                        result.put("p1", p1);
+                        result.put("p2", p2);
+                        result.put("p3", p3);
+
                         RESULT = result;
                     :};
 
@@ -483,9 +722,7 @@ point ::= expression:x COMMA expression:y
                         {
                             if(typeR == "Integer" || typeR == "Float")
                             {
-                                Object terceto1 = IntermediateCodeGenerator.addTerceto("X", left.get("value"), "");
-                                Object terceto2 = IntermediateCodeGenerator.addTerceto("Y", right.get("value"), "");
-                                Object terceto = IntermediateCodeGenerator.addTerceto("POINT", terceto1, terceto2);
+                                Object terceto = IntermediateCodeGenerator.addTerceto("POINT", left.get("value"), right.get("value"));
 
                                 Map<String, Object> result = new HashMap<>();
                                 result.put("value", terceto);

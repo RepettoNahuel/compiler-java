@@ -49,7 +49,7 @@ public class IntermediateCodeGenerator implements FileGenerator {
     }
 
     public static int getNextIndex() {
-        return tercNumber;
+        return tercNumber + 1;
     }
 
     public static boolean isSaltoEmpty() {
