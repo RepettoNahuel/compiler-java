@@ -115,7 +115,6 @@ public class IntermediateCodeGenerator implements FileGenerator {
     }
 
     private static ResultadoTerceto argComoTexto(String arg) {
-        System.out.println("argComoTexto -> " + arg);
         if (arg == null || arg.isEmpty()) {
             return new ResultadoTerceto("", 0.0);
         }
@@ -125,19 +124,14 @@ public class IntermediateCodeGenerator implements FileGenerator {
             return resolverTerceto(arg);
         }
 
-        System.out.println("argComoTexto 2 -> " + arg);
         // Caso: valor existente en la tabla de símbolos
         SymbolTableGenerator.Symbol sym_arg = SymbolTableGenerator.getSymbol(arg);
         if (sym_arg != null) {
-            System.out.println("argComoTexto 3 -> " + arg);
-
-            System.out.println("argComoTexto 3.5 -> " + sym_arg.getValue());
             String argStr = (String) sym_arg.getValue(); 
             double num = Double.parseDouble(argStr);
             return new ResultadoTerceto(arg, num);
         }
 
-        System.out.println("argComoTexto 4 -> " + arg);
         // Caso: constante numérica directa (int o float)
         try {
             double num = Double.parseDouble(arg);
