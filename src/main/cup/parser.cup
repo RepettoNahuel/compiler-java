@@ -320,8 +320,11 @@ expression ::= expression:left PLUS term:right
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("MAX", t1_area, t2_area);
 
+                        System.out.println(triangle1.get("value"));
+                        System.out.println(triangle2.get("value"));
+
                         Map<String, Object> result = new HashMap<>();
-                        result.put("value", terceto);
+                        result.put("value", "5.5");
                         result.put("type", "Float");
                         RESULT = result;
                     :}
@@ -430,11 +433,36 @@ triangle ::= OPEN_SQUARE_BRACKET point:p1 SEMI_COLON point:p2 SEMI_COLON point:p
                         Map<String, Object> point3 = (Map<String, Object>) p3;
 
                         System.out.println("[TRIANGLE] [point ; point ; point ]");
-                        Object temp_tri = IntermediateCodeGenerator.addTerceto("TRI_P1_P2", point1.get("value"), point2.get("value"));
-                        Object terceto = IntermediateCodeGenerator.addTerceto("POINT", temp_tri, point3.get("value"));
+                        //Object temp_tri = IntermediateCodeGenerator.addTerceto("TRI_P1_P2", point1.get("value"), point2.get("value"));
+                        //Object terceto = IntermediateCodeGenerator.addTerceto("POINT", temp_tri, point3.get("value"));
+
+                        IntermediateCodeGenerator.DetalleTerceto pp1 = IntermediateCodeGenerator.getTerceto(point1.get("value").toString());
+                        IntermediateCodeGenerator.DetalleTerceto pp2 = IntermediateCodeGenerator.getTerceto(point2.get("value").toString());
+                        IntermediateCodeGenerator.DetalleTerceto pp3 = IntermediateCodeGenerator.getTerceto(point3.get("value").toString());
+
+                        Object temp_tr1 = IntermediateCodeGenerator.addTerceto("SUB", pp2.arg2, pp3.arg2);
+                        Object temp_tr2 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr1, pp1.arg1);
+
+                        Object temp_tr3 = IntermediateCodeGenerator.addTerceto("SUB", pp3.arg2, pp1.arg2);
+                        Object temp_tr4 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr3, pp2.arg1);
+
+                        Object temp_tr5 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr2, temp_tr4);
+
+                        Object temp_tr6 = IntermediateCodeGenerator.addTerceto("SUB", pp1.arg2, pp2.arg2);
+                        Object temp_tr7 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr6, pp3.arg1);
+
+                        Object temp_tr8 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr5, temp_tr7);
+
+                        Object temp_tr9 = IntermediateCodeGenerator.addTerceto("DIV", temp_tr8, "2");
+
+                        Object temp_tr10 = IntermediateCodeGenerator.addTerceto("ASSIGN", "AREA", temp_tr9);
+
+                        //System.out.println(pp1.index + " " + pp1.operador + " " + pp1.arg1 + " " + pp1.arg2);
+                        //System.out.println(pp2.index + " " + pp2.operador + " " + pp2.arg1 + " " + pp2.arg2);
+                        //System.out.println(pp3.index + " " + pp3.operador + " " + pp3.arg1 + " " + pp3.arg2);
 
                         Map<String, Object> result = new HashMap<>();
-                        result.put("value", terceto);
+                        result.put("value", 5);         //reemplazar pór valor de area
                         result.put("type", "triangle");
                         RESULT = result;
                     :};
@@ -452,7 +480,10 @@ point ::= expression:x COMMA expression:y
                         {
                             if(typeR == "Integer" || typeR == "Float")
                             {
-                                Object terceto = IntermediateCodeGenerator.addTerceto("POINT", left.get("value"), right.get("value"));
+                                Object terceto1 = IntermediateCodeGenerator.addTerceto("X", left.get("value"), "");
+                                Object terceto2 = IntermediateCodeGenerator.addTerceto("Y", right.get("value"), "");
+                                Object terceto = IntermediateCodeGenerator.addTerceto("POINT", terceto1, terceto2);
+
                                 Map<String, Object> result = new HashMap<>();
                                 result.put("value", terceto);
                                 result.put("type", "point");

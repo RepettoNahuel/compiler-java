@@ -141,4 +141,43 @@ public class IntermediateCodeGenerator implements FileGenerator {
             return new ResultadoTerceto(arg, 0.0);
         }
     }
+
+    public static class DetalleTerceto {
+        public int index;
+        public String operador;
+        public String arg1;
+        public String arg2;
+
+        public DetalleTerceto(int index, String operador, String arg1, String arg2) {
+            this.index = index;
+            this.operador = operador;
+            this.arg1 = arg1;
+            this.arg2 = arg2;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("[%d] = (%s, %s, %s)", index, operador, arg1, arg2);
+        }
+    }
+
+    public static DetalleTerceto getTerceto(String referencia) {
+        if (referencia == null || referencia.length() < 3 || referencia.charAt(0) != '[' || referencia.charAt(referencia.length() - 1) != ']') {
+            throw new IllegalArgumentException("Referencia de terceto inválida: " + referencia);
+        }
+
+        int index;
+        try {
+            index = Integer.parseInt(referencia.substring(1, referencia.length() - 1));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Número de terceto inválido: " + referencia);
+        }
+
+        String[] data = tercetosMap.get(index);
+        if (data == null) {
+            throw new IllegalArgumentException("No existe el terceto con índice [" + index + "]");
+        }
+
+        return new DetalleTerceto(index, data[0], data[1], data[2]);
+    }
 }

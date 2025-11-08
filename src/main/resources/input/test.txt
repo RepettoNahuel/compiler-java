@@ -85,4 +85,6 @@ EqualTrue := equalExpressions(a + b, 5, b * 2, 3 + 2, a + b)
 
 EqualFalse := equalExpressions(0, -5, a + b) 
 
+areaMax := triangleAreaMaximum( [0,x; 4.0,12; 2.5,3] ; [x,0; 6,0; z,2] ) 
+
 #+ Esto es un comentario +#
