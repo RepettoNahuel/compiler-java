@@ -49,7 +49,8 @@ public class SymbolTableGenerator implements FileGenerator{
             String name = symbol.getName() != null ? symbol.getName() : " ";
             String type = symbol.getType() != null ? symbol.getType() : " ";
             String value = symbol.getValue() != null ? symbol.getValue() : " ";
-            String length = (symbol.getType() != null && (symbol.getType().equals("CTE_STRING") || symbol.getType().equals("String"))) ? String.valueOf(symbol.getLength()) : " ";
+            String length = (symbol.getType() != null && (symbol.getType().equals("CTE_STRING") || symbol.getType().equals("String")))? String.valueOf(symbol.getLength()) : " ";
+            if (length.equals("0")) {length = " ";};
             fileWriter.write(name + " | " + type + " | " + value + " | " + length + "\n");
         }
     }

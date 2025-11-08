@@ -133,24 +133,33 @@ assignment ::=  IDENTIFIER:id ASSIG expression:e
 
                         String aux = eStr; 
 
-                        if (!eType.equals(id_type) && !id_type.equals("VARIABLE")) throw new RuntimeException("Asignacion incompatibles: " + id_type + " = " + eType);
-
-                        symbolTable.updateVariableS(id, eType, "", 0); 
+                        if (!eType.equals(id_type) && !id_type.equals("VARIABLE")) throw new RuntimeException("Asignacion incompatibles: " + id_type + " = " + eType);                       
 
                         if (eStr.length() >= 2 && eStr.charAt(0) == '(' && eStr.charAt(eStr.length() - 1) == ')') { 
                             aux = eStr.substring(1, eStr.length() - 1); 
                         } 
-
-                        System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + aux); 
+                        
                         if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id); 
 
-                        String resultado = aux;
-
                         if (eStr.length() >= 2 && eStr.charAt(0) == '[' && eStr.charAt(eStr.length() - 1) == ']') { 
-                            resultado = (String) IntermediateCodeGenerator.resolverTerceto(aux);
-                        }                                                 
+                            IntermediateCodeGenerator.ResultadoTerceto res = IntermediateCodeGenerator.resolverTerceto(aux); 
+                            symbolTable.updateVariableS(id, eType, String.valueOf(res.valor), 0); 
+                            System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + res.expresion); 
+                        }  
+                        else{
+                            SymbolTableGenerator.Symbol sym_aux = SymbolTableGenerator.getSymbol(aux);
+                            
+                            if (sym_aux != null) {
+                                symbolTable.updateVariableS(id, eType, sym_aux.getValue(), sym_aux.getLength());
+                            }
+                            else{
+                                symbolTable.updateVariableS(id, eType, aux, 0); 
+                            }
+                            
+                            System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + aux); 
+                        }                                             
 
-                        IntermediateCodeGenerator.addTerceto("ASSIGN", id, resultado); 
+                        IntermediateCodeGenerator.addTerceto("ASSIGN", id, aux); 
                         RESULT = aux; 
                     :}
                 |  IDENTIFIER:id ASSIG STRING_CONSTANT:strc

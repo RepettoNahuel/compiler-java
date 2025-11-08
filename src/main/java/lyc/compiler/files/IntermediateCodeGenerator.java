@@ -59,9 +59,20 @@ public class IntermediateCodeGenerator implements FileGenerator {
     }
 
     ////Para obetenr valor de tercetos////
-    public static Object resolverTerceto(String terc) {
 
-        int index = Integer.parseInt(terc.replaceAll("[\\[\\]]", ""));
+    public static class ResultadoTerceto {
+        public String expresion;
+        public double valor;
+
+        public ResultadoTerceto(String expresion, double valor) {
+            this.expresion = expresion;
+            this.valor = valor;
+        }
+    }
+
+    public static ResultadoTerceto resolverTerceto(String terc) {
+
+        int index = Integer.parseInt(terc.substring(1, terc.length() - 1));
 
         String[] terceto = tercetosMap.get(index);
         if (terceto == null) {
@@ -69,52 +80,71 @@ public class IntermediateCodeGenerator implements FileGenerator {
         }
 
         String op = terceto[0];
-        String arg1 = terceto[1];
-        String arg2 = terceto[2];
+        String a1 = terceto[1];
+        String a2 = terceto[2];
 
         // Resolver operandos recursivamente
-        Object val1 = obtenerValor(arg1);
-        Object val2 = obtenerValor(arg2);
+        ResultadoTerceto v1 = argComoTexto(a1);
+        ResultadoTerceto v2 = argComoTexto(a2);
+
+        double valor;
+        String expresion;
 
         switch (op) {
-            case "ADD": return toNumber(val1) + toNumber(val2);
-            case "SUB": return toNumber(val1) - toNumber(val2);
-            case "MULT": return toNumber(val1) * toNumber(val2);
-            case "DIV": return toNumber(val1) / toNumber(val2);
+            case "ADD":
+                valor = v1.valor + v2.valor;
+                expresion = "(" + v1.expresion + " + " + v2.expresion + ")";
+                break;
+            case "SUB":
+                valor = v1.valor - v2.valor;
+                expresion = "(" + v1.expresion + " - " + v2.expresion + ")";
+                break;
+            case "MULT":
+                valor = v1.valor * v2.valor;
+                expresion = "(" + v1.expresion + " * " + v2.expresion + ")";
+                break;
+            case "DIV":
+                valor = v1.valor / v2.valor;
+                expresion = "(" + v1.expresion + " / " + v2.expresion + ")";
+                break;
             default:
-                throw new UnsupportedOperationException("Operador no soportado: " + op);
+                throw new IllegalArgumentException("Operador no soportado: " + op);
         }
+
+        return new ResultadoTerceto(expresion, valor);
     }
 
-    private static Object obtenerValor(String arg) {
-        if (arg == null) return 0;
+    private static ResultadoTerceto argComoTexto(String arg) {
+        System.out.println("argComoTexto -> " + arg);
+        if (arg == null || arg.isEmpty()) {
+            return new ResultadoTerceto("", 0.0);
+        }
 
         // Caso: referencia a otro terceto -> "[23]"
-        if (arg.matches("\\[\\d+\\]")) {
+        if (arg.length() >= 2 && arg.charAt(0) == '[' && arg.charAt(arg.length() - 1) == ']') { 
             return resolverTerceto(arg);
         }
 
-        // Caso: número literal
-        if (arg.matches("-?\\d+(\\.\\d+)?")) {
-            return arg.contains(".") ? Float.parseFloat(arg) : Integer.parseInt(arg);
+        System.out.println("argComoTexto 2 -> " + arg);
+        // Caso: valor existente en la tabla de símbolos
+        SymbolTableGenerator.Symbol sym_arg = SymbolTableGenerator.getSymbol(arg);
+        if (sym_arg != null) {
+            System.out.println("argComoTexto 3 -> " + arg);
+
+            System.out.println("argComoTexto 3.5 -> " + sym_arg.getValue());
+            String argStr = (String) sym_arg.getValue(); 
+            double num = Double.parseDouble(argStr);
+            return new ResultadoTerceto(arg, num);
         }
 
-        // Caso: variable -> buscar en la tabla de símbolos
-        SymbolTableGenerator.Symbol sym = SymbolTableGenerator.getSymbol(arg);
-        if (sym != null && sym.getValue() != null) {
-            return sym.getValue();
-        }
-
-        // Si no se encontró valor, retornar el nombre literal
-        return arg;
-    }
-
-    private static float toNumber(Object val) {
-        if (val instanceof Number) return ((Number) val).floatValue();
+        System.out.println("argComoTexto 4 -> " + arg);
+        // Caso: constante numérica directa (int o float)
         try {
-            return Float.parseFloat(val.toString());
-        } catch (Exception e) {
-            throw new RuntimeException("No se puede convertir a número: " + val);
+            double num = Double.parseDouble(arg);
+            return new ResultadoTerceto(arg, num);
+        } catch (NumberFormatException e) {
+            // Si no es número y tampoco está en tabla, lo devolvemos como literal sin valor numérico
+            return new ResultadoTerceto(arg, 0.0);
         }
     }
 }
