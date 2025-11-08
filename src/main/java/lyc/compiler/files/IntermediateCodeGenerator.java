@@ -11,6 +11,7 @@ public class IntermediateCodeGenerator implements FileGenerator {
     private static final Map<Integer, String[]> tercetosMap = new HashMap<>();
     private static int tercNumber = 0;
     private static final Stack<Integer> pilaSaltos = new Stack<>();
+    private static int tempCounter = 0;
 
     public static String addTerceto(String op, Object arg1, Object arg2) {
         String sArg1 = arg1 != null ? arg1.toString() : null;
@@ -40,12 +41,23 @@ public class IntermediateCodeGenerator implements FileGenerator {
         }
     }
 
+    public static void rellenarSalto(int index, int destino) {
+        String[] terceto = tercetosMap.get(index);
+        if (terceto != null) {
+            terceto[1] = "[" + destino + "]";
+        }
+    }
+
     public static int getNextIndex() {
         return tercNumber;
     }
 
     public static boolean isSaltoEmpty() {
         return pilaSaltos.isEmpty();
+    }
+
+    public static String getNewTemp() {
+    return "T" + (++tempCounter);
     }
 
     @Override

@@ -373,55 +373,58 @@ expression ::= expression:left PLUS term:right
                                 lista = lista + ", " + newValor;
                             }
                         }
-                /*
-                        List<String> beList = new ArrayList<>();
-                        for (int i = 0; i < tmp.size(); i++) {
-                            for (int j = i + 1; j < tmp.size(); j++) {
-                                // Extraigo cada mapa
-                                Map<String, Object> leftMap = tmp.get(i);
-                                Map<String, Object> rightMap = tmp.get(j);
-
-                                // Obtengo los valores reales de cada expresión
-                                String left = (String) leftMap.get("value");
-                                String right = (String) rightMap.get("value");
-                */
-                                // Si los valores son tercetos ("[1]"), lo resolvemos? En caso de SI, descomentar
-                                /*
-                                if (left.length() >= 2 && left.charAt(0) == '[' && left.charAt(left.length() - 1) == ']') {
-                                    IntermediateCodeGenerator.ResultadoTerceto valLeft = IntermediateCodeGenerator.resolverTerceto(left);
-                                    left = valLeft.expresion;
-                                }
-
-                                if (right.length() >= 2 && right.charAt(0) == '[' && right.charAt(right.length() - 1) == ']') {
-                                    IntermediateCodeGenerator.ResultadoTerceto valRight = IntermediateCodeGenerator.resolverTerceto(right);
-                                    right = valRight.expresion;
-                                }*/
-
-                                // Genero CMP
-                /*              IntermediateCodeGenerator.addTerceto("CMP", left, right);
-
-                                // Genero BE con salto pendiente
-                                String beIndex = IntermediateCodeGenerator.addTerceto("BE", null, null);
-                                beList.add(beIndex);
-                            }
-                        }
-                        for (String beIndex : beList) {
-                            // Tengo q sacarle esos corchetes del orto
-                            int TercetoPendiente = Integer.parseInt(beIndex.replace("[", "").replace("]", ""));
-                            IntermediateCodeGenerator.completarSalto(TercetoPendiente, IntermediateCodeGenerator.getNextIndex());
-                        }
-                */
+                
 
                         lista = lista + ")";
 
+                        List<String> saltosTrue = new ArrayList<>();
+
+                        for (int i = 0; i < tmp.size() - 1; i++) {
+                            Map<String, Object> item1 = (Map<String, Object>) tmp.get(i);
+                            Map<String, Object> item2 = (Map<String, Object>) tmp.get(i + 1);
+
+                            String val1 = (String) item1.get("value");
+                            String val2 = (String) item2.get("value");
+
+                            // Si alguno es terceto, resolverlo
+                           /* if (val1.startsWith("[") && val1.endsWith("]")) {
+                                val1 = IntermediateCodeGenerator.resolverTerceto(val1).expresion;
+                            }
+                            if (val2.startsWith("[") && val2.endsWith("]")) {
+                                val2 = IntermediateCodeGenerator.resolverTerceto(val2).expresion;
+                            }*/
+
+                            IntermediateCodeGenerator.addTerceto("CMP", val1, val2);
+
+                            String saltoTrue = IntermediateCodeGenerator.addTerceto("BE", null, null);
+                            saltosTrue.add(saltoTrue);
+                        }
+
+                        String auxiliarAssig = IntermediateCodeGenerator.getNewTemp();
+
+                        String assignAuxFalse = IntermediateCodeGenerator.addTerceto("ASSIGN", auxiliarAssig, "False");
+                        String saltoFalso = IntermediateCodeGenerator.addTerceto("BI", null, null);
+
+                        for (String salto : saltosTrue) {
+                            int TercetoPendiente = Integer.parseInt(salto.replace("[", "").replace("]", ""));
+                            IntermediateCodeGenerator.rellenarSalto(TercetoPendiente, IntermediateCodeGenerator.getNextIndex());
+                        }
+
+                        String assignAuxTrue = IntermediateCodeGenerator.addTerceto("ASSIGN", auxiliarAssig, "True");
+
+                        int SaltoPendiente = Integer.parseInt(saltoFalso.replace("[", "").replace("]", ""));
+                        IntermediateCodeGenerator.rellenarSalto(SaltoPendiente, IntermediateCodeGenerator.getNextIndex());
+
                         System.out.println("[EXPRESSION] equalExpressions ( Expression List ): " + lista);
 
-                        //Verificar si hay valores repetidos
                         java.util.Set<Double> conjuntoUnico = new java.util.HashSet<>(valoresEvaluados);
                         boolean hayRepetidos = (conjuntoUnico.size() < valoresEvaluados.size());
+                        String resultadoRepetidos = hayRepetidos ? "True" : "False" ;
+
+                        System.out.println("[EXPRESSION] equalExpressions : " + auxiliarAssig + " := " + resultadoRepetidos);
 
                         Map<String, Object> result = new HashMap<>();
-                        result.put("value", hayRepetidos ? "True" : "False");
+                        result.put("value", auxiliarAssig);
                         result.put("type", "Boolean");
                         RESULT = result;
                     :};
