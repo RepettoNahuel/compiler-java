@@ -315,7 +315,34 @@ expression ::= expression:left PLUS term:right
                 | EQUAL_EXPRESSIONS OPEN_BRACKET expression_list:el CLOSE_BRACKET
                     {: 
                         String res = lyc.compiler.files.ExpressionUtils.equalExpressions(el);
-                        System.out.println("[EXPRESSION] equalExpressions ( Expression List ): " + el);
+
+                        java.util.List<Object> tmp = (java.util.List<Object>) el;
+
+                        String lista = "";
+                        String newValor = "";
+
+                        for (Object item : tmp) {
+
+                            Map<String, Object> itemList = (Map<String, Object>) item;
+
+                            newValor = (String) itemList.get("value");
+
+                            if (newValor.length() >= 2 && newValor.charAt(0) == '[' && newValor.charAt(newValor.length() - 1) == ']') { 
+                                IntermediateCodeGenerator.ResultadoTerceto vall = IntermediateCodeGenerator.resolverTerceto(newValor); 
+                                newValor = vall.expresion;
+                            }
+
+                            if (lista.equals("")){
+                                lista = "(" + newValor;
+                            }
+                            else{
+                                lista = lista + ", " + newValor;
+                            }
+                        }
+
+                        lista = lista + ")";
+
+                        System.out.println("[EXPRESSION] equalExpressions ( Expression List ): " + lista);
 
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", res);
