@@ -95,11 +95,13 @@ TriangleAreaMaximum = "triangleAreaMaximum"
 /* Identificadores */
 Identifier = {Letter}({Letter}|{Digit})*
 
+BooleanConstant = "true" | "false"
+
 /* Constantes */
 IntegerConstant = 0 | -?[1-9]{Digit}*
 FloatConstant   = -?{Digit}+\.{Digit}* | \.{Digit}+
 StringConstant = \"(.*)\"
-BooleanConstant = true | false
+
 
 /* Comentarios */
 Comment = "#+"([^#]|#+[^#+])*"+#"
@@ -158,6 +160,14 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
   {EqualExpressions}            { return symbol(ParserSym.EQUAL_EXPRESSIONS); }     // "equalExpressions"
   {TriangleAreaMaximum}         { return symbol(ParserSym.TRIANGLE_AREA_MAXIMUM); } // "triangleAreaMaximum"
 
+  /* Constantes Boolean */
+  {BooleanConstant}             {
+                                  String value = yytext();
+                                  String generatedName = "_" + value;
+                                  SymbolTableGenerator.insertNonStringConstant(generatedName, value, "CTE_BOOLEAN");
+                                  return symbol(ParserSym.BOOLEAN_CONSTANT, generatedName);
+                                }
+
   /* Identificadores */
   {Identifier}                  { 
                                     String value = yytext();
@@ -166,7 +176,10 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
                                   if (longitud > STRING_MAX_LENGTH) {
                                       throw new InvalidLengthException("String demasiado largo: " + value);
                                   }
-                                  SymbolTableGenerator.insertVariable(value, "", "VARIABLE");
+
+                                  if(!SymbolTableGenerator.exists(value)) {
+                                      SymbolTableGenerator.insertVariable(value, "", "VARIABLE");
+                                  }
 
                                   return symbol(ParserSym.IDENTIFIER, yytext()); 
                                     
@@ -208,15 +221,12 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
                                       throw new InvalidLengthException("String demasiado largo: " + contenido);
                                   }
 
-                                  String generatedName = "_stringConstant" + stringNbr++;
+                                  //String generatedName = "_stringConstant" + stringNbr++;
+                                  //SymbolTableGenerator.insertStringConstant(generatedName, contenido, "CTE_STRING", longitud);
+                                  
+                                  String generatedName = "_" + contenido;
                                   SymbolTableGenerator.insertStringConstant(generatedName, contenido, "CTE_STRING", longitud);
                                   return symbol(ParserSym.STRING_CONSTANT, generatedName);
-                               }
-  {BooleanConstant}             {
-                                  String value = yytext();
-                                  String generatedName = "_booleanConstant" + booleanNbr++;
-                                  SymbolTableGenerator.insertNonStringConstant(generatedName, value, "CTE_BOOLEAN");
-                                  return symbol(ParserSym.BOOLEAN_CONSTANT, generatedName);
                                 }
 
   /* whitespace */

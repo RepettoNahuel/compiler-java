@@ -3,12 +3,19 @@ package lyc.compiler;
 import java_cup.runtime.*;
 import lyc.compiler.files.SymbolTableGenerator;
 import lyc.compiler.files.IntermediateCodeGenerator;
-import java.util.Stack;
+import java.util.*;
 
 class Parser;
 
 parser code {:
     private final SymbolTableGenerator symbolTable = new SymbolTableGenerator();
+
+    private static final java.util.Set<String> NUMERIC_TYPES = java.util.Set.of("Integer", "Float");
+
+    private static String promoteNumericType(String a, String b) {
+        if ("Float".equals(a) || "Float".equals(b)) return "Float";
+        return "Integer";
+    }
 :}
 
 /*** Elementos Terminales ***/
@@ -97,9 +104,6 @@ non terminal type_specifier;
 non terminal triangle;
 non terminal point;
 non terminal Object expression_list;
-non terminal numeric_expression;
-non terminal numeric_term;
-non terminal numeric_factor;
 
 // ----------------------------------------------------
 // Start Symbol
@@ -125,17 +129,58 @@ statement ::= assignment
             | write_statement
             | init_block;   
 
-assignment ::=  IDENTIFIER:id ASSIG expression:e
+assignment ::=  IDENTIFIER:id ASSIG expression:exp
                     {: 
-                        System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + e); 
-                        if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
-                        IntermediateCodeGenerator.addTerceto("ASSIGN", id, e);
-                        RESULT = e;
+                        SymbolTableGenerator.Symbol sym_id = SymbolTableGenerator.getSymbol(id);
+                        String id_type = sym_id.getType();
+
+                        Map<String, Object> eMap = (Map<String, Object>) exp;
+                        String eType = (String) eMap.get("type");
+                        String eStr = (String) eMap.get("value"); 
+
+                        String aux = eStr; 
+
+                        if (!eType.equals(id_type) && !id_type.equals("VARIABLE")) throw new RuntimeException("Asignacion incompatibles: " + id_type + " = " + eType);                       
+
+                        if (eStr.length() >= 2 && eStr.charAt(0) == '(' && eStr.charAt(eStr.length() - 1) == ')') { 
+                            aux = eStr.substring(1, eStr.length() - 1); 
+                        } 
+                        
+                        if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id); 
+
+                        if (eStr.length() >= 2 && eStr.charAt(0) == '[' && eStr.charAt(eStr.length() - 1) == ']') { 
+                            IntermediateCodeGenerator.ResultadoTerceto res = IntermediateCodeGenerator.resolverTerceto(aux); 
+                            symbolTable.updateVariableS(id, eType, String.valueOf(res.valor), 0); 
+                            System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + res.expresion); 
+                        }  
+                        else{
+                            SymbolTableGenerator.Symbol sym_aux = SymbolTableGenerator.getSymbol(aux);
+                            
+                            if (sym_aux != null) {
+                                symbolTable.updateVariableS(id, eType, sym_aux.getValue(), sym_aux.getLength());
+                            }
+                            else{
+                                symbolTable.updateVariableS(id, eType, aux, 0); 
+                            }
+                            
+                            System.out.println("[ASSIGNMENT] Id := Expression -> " + id + " := " + aux); 
+                        }                                             
+
+                        IntermediateCodeGenerator.addTerceto("ASSIGN", id, aux); 
+                        RESULT = aux; 
                     :}
                 |  IDENTIFIER:id ASSIG STRING_CONSTANT:strc
                     {:
                         System.out.println("[ASSIGNMENT] Id := String Constant -> " + id + " := " + strc); 
-                        if(!symbolTable.existsDynamic(id) && !symbolTable.exists(id)) throw new RuntimeException("Variable no declarada: " + id);
+                      
+                        SymbolTableGenerator.Symbol sym_id = SymbolTableGenerator.getSymbol(id);
+                        SymbolTableGenerator.Symbol sym_strc = SymbolTableGenerator.getSymbol(strc);
+
+                        String id_type = sym_id.getType();
+                        if (!id_type.equals("VARIABLE") && !id_type.equals("CTE_STRING") && !id_type.equals("STRING") && !id_type.equals("String")) throw new RuntimeException("Asignacion incompatible. El tipo de la variable " + sym_id.getName() + ": " + id_type + " no corresponde con el tipo de la expresion " + sym_strc.getName() + ": " + sym_strc.getType());
+                       
+                        symbolTable.updateVariableS(id, "String", sym_strc.getValue(), sym_strc.getLength()); 
+
                         IntermediateCodeGenerator.addTerceto("ASSIGN", id, strc);
                         RESULT = strc;
                     :};
@@ -210,148 +255,628 @@ write_statement ::= WRITE OPEN_BRACKET expression:exp CLOSE_BRACKET
 expression ::= expression:left PLUS term:right
                     {:
                         System.out.println("[EXPRESSION] Expresion + Term");
-                        RESULT = IntermediateCodeGenerator.addTerceto("ADD", left, right);
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
+                            throw new RuntimeException("Tipos incompatibles en suma: " + typeL + " + " + typeR + ". Solo Integer o Float permitidos.");
+                        }
+
+                        String resultType = promoteNumericType(typeL, typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("ADD", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", resultType);
+                        RESULT = result;
                     :}
                 | expression:left SUB term:right 
                     {: 
                         System.out.println("[EXPRESSION] Expresion - Term"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("SUB", left, right);
+                        
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
+                            throw new RuntimeException("Tipos incompatibles en resta: " + typeL + " - " + typeR + ". Solo Integer o Float permitidos.");
+                        }
+
+                        String resultType = promoteNumericType(typeL, typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("SUB", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", resultType);
+                        RESULT = result;
                     :}
                 | term:term
                     {: 
                         System.out.println("[EXPRESSION] Term"); 
-                        RESULT = term;
+
+                        Map<String, Object> termino = (Map<String, Object>) term;
+                        String typeTermino = (String) termino.get("type");
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", termino.get("value"));
+                        result.put("type", typeTermino);
+                        RESULT = result;
                     :}
                 | TRIANGLE_AREA_MAXIMUM OPEN_BRACKET triangle:t1 SEMI_COLON triangle:t2 CLOSE_BRACKET 
                     {: 
                         System.out.println("[EXPRESSION] triangleAreaMaximum ( Triangle ; Triangle )");
-                        Object t1_area = IntermediateCodeGenerator.addTerceto("AREA", t1, null);
-                        Object t2_area = IntermediateCodeGenerator.addTerceto("AREA", t2, null);
-                        RESULT = IntermediateCodeGenerator.addTerceto("MAX", t1_area, t2_area);
+                        Map<String, Object> triangle1 = (Map<String, Object>) t1;
+                        Map<String, Object> triangle2 = (Map<String, Object>) t2;
+
+                        float maximo;
+                        float areaAux = 0;
+                        float intermedio = 0;
+                        float valor1 = 0;
+                        float valor2 = 0;
+
+                        //Triangulo1
+                        Map<String, Object> point11 = (Map<String, Object>) triangle1.get("p1");
+                        Map<String, Object> point12 = (Map<String, Object>) triangle1.get("p2");
+                        Map<String, Object> point13 = (Map<String, Object>) triangle1.get("p3");
+
+                        IntermediateCodeGenerator.DetalleTerceto pp11 = IntermediateCodeGenerator.getTerceto(point11.get("value").toString());
+                        IntermediateCodeGenerator.DetalleTerceto pp12 = IntermediateCodeGenerator.getTerceto(point12.get("value").toString());
+                        IntermediateCodeGenerator.DetalleTerceto pp13 = IntermediateCodeGenerator.getTerceto(point13.get("value").toString());
+
+                        Object temp_tr1 = IntermediateCodeGenerator.addTerceto("SUB", pp12.arg2, pp13.arg2);                        
+
+                        SymbolTableGenerator.Symbol sym_aux = SymbolTableGenerator.getSymbol(pp12.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp12.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp13.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp13.arg2);
+                        }
+                            
+                        areaAux = valor1 - valor2;
+
+                        Object temp_tr2 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr1, pp11.arg1);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp11.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp11.arg1);
+                        }
+
+                        areaAux = areaAux * valor1;
+
+                        Object temp_tr3 = IntermediateCodeGenerator.addTerceto("SUB", pp13.arg2, pp11.arg2);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp13.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp13.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp11.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp11.arg2);
+                        }
+                            
+                        intermedio = valor1 - valor2;
+
+                        Object temp_tr4 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr3, pp12.arg1);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp12.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp12.arg1);
+                        }
+
+                        intermedio = intermedio * valor1;                        
+
+                        Object temp_tr5 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr2, temp_tr4);
+
+                        areaAux = areaAux + intermedio;
+
+                        Object temp_tr6 = IntermediateCodeGenerator.addTerceto("SUB", pp11.arg2, pp12.arg2);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp11.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp11.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp12.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp12.arg2);
+                        }
+                            
+                        intermedio = valor1 - valor2;
+
+                        Object temp_tr7 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr6, pp13.arg1);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp13.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp13.arg1);
+                        }
+
+                        intermedio = intermedio * valor1; 
+
+                        Object temp_tr8 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr5, temp_tr7);
+
+                        areaAux = areaAux + intermedio;
+
+                        Object temp_tr9 = IntermediateCodeGenerator.addTerceto("DIV", temp_tr8, "2");
+
+                        areaAux = Math.abs(areaAux) / 2;
+                        maximo = areaAux;
+
+                        SymbolTableGenerator.insertVariable("@areaMax", String.valueOf(maximo), "Float");
+
+                        Object temp_tr10 = IntermediateCodeGenerator.addTerceto("ASSIGN", "@areaMax", temp_tr9);
+
+                        //Triangulo2
+                        Map<String, Object> point21 = (Map<String, Object>) triangle2.get("p1");
+                        Map<String, Object> point22 = (Map<String, Object>) triangle2.get("p2");
+                        Map<String, Object> point23 = (Map<String, Object>) triangle2.get("p3");
+
+                        IntermediateCodeGenerator.DetalleTerceto pp21 = IntermediateCodeGenerator.getTerceto(point21.get("value").toString());
+                        IntermediateCodeGenerator.DetalleTerceto pp22 = IntermediateCodeGenerator.getTerceto(point22.get("value").toString());
+                        IntermediateCodeGenerator.DetalleTerceto pp23 = IntermediateCodeGenerator.getTerceto(point23.get("value").toString());
+
+                        Object temp_tr21 = IntermediateCodeGenerator.addTerceto("SUB", pp22.arg2, pp23.arg2);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp22.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp22.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp23.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp23.arg2);
+                        }
+                            
+                        areaAux = valor1 - valor2;
+
+                        Object temp_tr22 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr21, pp21.arg1);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp21.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp21.arg1);
+                        }
+
+                        areaAux = areaAux * valor1;
+
+                        Object temp_tr23 = IntermediateCodeGenerator.addTerceto("SUB", pp23.arg2, pp21.arg2);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp23.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp23.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp21.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp21.arg2);
+                        }
+                            
+                        intermedio = valor1 - valor2;
+
+                        Object temp_tr24 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr23, pp22.arg1);
+                        
+                        sym_aux = SymbolTableGenerator.getSymbol(pp22.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp22.arg1);
+                        }
+
+                        intermedio = intermedio * valor1;  
+
+                        Object temp_tr25 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr22, temp_tr24);
+
+                        areaAux = areaAux + intermedio;
+
+                        Object temp_tr26 = IntermediateCodeGenerator.addTerceto("SUB", pp21.arg2, pp22.arg2);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp21.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp21.arg2);
+                        }
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp22.arg2);
+                            
+                        if (sym_aux != null) {
+                            valor2 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor2 =  Float.parseFloat(pp22.arg2);
+                        }
+                            
+                        intermedio = valor1 - valor2;
+
+                        Object temp_tr27 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr26, pp23.arg1);
+
+                        sym_aux = SymbolTableGenerator.getSymbol(pp23.arg1);
+                            
+                        if (sym_aux != null) {
+                            valor1 =  Float.parseFloat(sym_aux.getValue());
+                        }
+                        else{
+                            valor1 =  Float.parseFloat(pp23.arg1);
+                        }
+
+                        intermedio = intermedio * valor1; 
+
+                        Object temp_tr28 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr25, temp_tr27);
+
+                        areaAux = areaAux + intermedio;
+
+                        Object temp_tr29 = IntermediateCodeGenerator.addTerceto("DIV", temp_tr28, "2");
+
+                        areaAux = Math.abs(areaAux) / 2;
+
+                        Object temp_tr210 = IntermediateCodeGenerator.addTerceto("CMP", temp_tr29, temp_tr9);
+
+                        int salto = IntermediateCodeGenerator.getNextIndex() + 1;
+
+                        Object temp_tr211 = IntermediateCodeGenerator.addTerceto("BLE", "[" + salto + "]", "");
+
+                        Object temp_tr212 = IntermediateCodeGenerator.addTerceto("ASSIGN", "@areaMax", temp_tr29);
+
+                        if (areaAux > maximo){
+                            maximo = areaAux;
+                            SymbolTableGenerator.insertVariable("@areaMax", String.valueOf(maximo), "Float");
+                        } 
+                       
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", "@areaMax");
+                        result.put("type", "Float");
+                        RESULT = result;
                     :}
                 | EQUAL_EXPRESSIONS OPEN_BRACKET expression_list:el CLOSE_BRACKET
                     {: 
-                        String res = lyc.compiler.files.ExpressionUtils.equalExpressions(el);
-                        System.out.println("[EXPRESSION] equalExpressions ( Expression List ): " + el);
-                        RESULT = res;
+                        Map<String, Object> expressionList = (Map<String, Object>) el;
+                        java.util.List<Map<String, Object>> tmp = (java.util.List<Map<String, Object>>) expressionList.get("value");
+                        
+                        if (tmp == null || tmp.size() < 2) {
+                            throw new RuntimeException("equalExpressions requiere al menos dos expresiones.");
+                        }
+
+                        String lista = "";
+                        String newValor = "";
+                        java.util.List<Double> valoresEvaluados = new java.util.ArrayList<>();
+
+                        for (Object item : tmp) {
+                            Map<String, Object> itemList = (Map<String, Object>) item;
+                            newValor = (String) itemList.get("value");
+
+                            // Si es un terceto, lo resolvemos
+                            if (newValor.length() >= 2 && newValor.charAt(0) == '[' && newValor.charAt(newValor.length() - 1) == ']') { 
+                                IntermediateCodeGenerator.ResultadoTerceto vall = IntermediateCodeGenerator.resolverTerceto(newValor); 
+                                newValor = vall.expresion;
+
+                                try {
+                                    valoresEvaluados.add(Double.parseDouble(String.valueOf(vall.valor)));
+                                } catch (NumberFormatException ex) {
+                                    // Si no se puede convertir, no lo agregamos
+                                    System.out.println("No se pudo convertir valor de terceto a número: " + vall.valor);
+                                }
+                            }
+
+                            else {
+                                try {
+                                    valoresEvaluados.add(Double.parseDouble(newValor));
+                                } catch (NumberFormatException ex) {
+                                    System.out.println("No se pudo convertir literal a número: " + newValor);
+                                }
+                            }
+
+                            if (lista.equals("")){
+                                lista = "(" + newValor;
+                            }
+                            else{
+                                lista = lista + ", " + newValor;
+                            }
+                        }
+                
+
+                        lista = lista + ")";
+
+                        List<String> saltosTrue = new ArrayList<>();
+
+                        for (int i = 0; i < tmp.size() - 1; i++) {
+                            Map<String, Object> item1 = (Map<String, Object>) tmp.get(i);
+                            Map<String, Object> item2 = (Map<String, Object>) tmp.get(i + 1);
+
+                            String val1 = (String) item1.get("value");
+                            String val2 = (String) item2.get("value");
+
+                            // Si alguno es terceto, resolverlo
+                           /* if (val1.startsWith("[") && val1.endsWith("]")) {
+                                val1 = IntermediateCodeGenerator.resolverTerceto(val1).expresion;
+                            }
+                            if (val2.startsWith("[") && val2.endsWith("]")) {
+                                val2 = IntermediateCodeGenerator.resolverTerceto(val2).expresion;
+                            }*/
+
+                            IntermediateCodeGenerator.addTerceto("CMP", val1, val2);
+
+                            String saltoTrue = IntermediateCodeGenerator.addTerceto("BE", null, null);
+                            saltosTrue.add(saltoTrue);
+                        }
+
+                        String auxiliarAssig = IntermediateCodeGenerator.getNewTemp();
+
+                        String assignAuxFalse = IntermediateCodeGenerator.addTerceto("ASSIGN", auxiliarAssig, "False");
+                        String saltoFalso = IntermediateCodeGenerator.addTerceto("BI", null, null);
+
+                        for (String salto : saltosTrue) {
+                            int TercetoPendiente = Integer.parseInt(salto.replace("[", "").replace("]", ""));
+                            IntermediateCodeGenerator.rellenarSalto(TercetoPendiente, IntermediateCodeGenerator.getNextIndex());
+                        }
+
+                        String assignAuxTrue = IntermediateCodeGenerator.addTerceto("ASSIGN", auxiliarAssig, "True");
+
+                        int SaltoPendiente = Integer.parseInt(saltoFalso.replace("[", "").replace("]", ""));
+                        IntermediateCodeGenerator.rellenarSalto(SaltoPendiente, IntermediateCodeGenerator.getNextIndex());
+
+                        System.out.println("[EXPRESSION] equalExpressions ( Expression List ): " + lista);
+
+                        java.util.Set<Double> conjuntoUnico = new java.util.HashSet<>(valoresEvaluados);
+                        boolean hayRepetidos = (conjuntoUnico.size() < valoresEvaluados.size());
+                        String resultadoRepetidos = hayRepetidos ? "True" : "False" ;
+
+                        System.out.println("[EXPRESSION] equalExpressions : " + auxiliarAssig + " := " + resultadoRepetidos);
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", auxiliarAssig);
+                        result.put("type", "Boolean");
+                        RESULT = result;
                     :};
 
 triangle ::= OPEN_SQUARE_BRACKET point:p1 SEMI_COLON point:p2 SEMI_COLON point:p3 CLOSE_SQUARE_BRACKET 
                     {: 
                         System.out.println("[TRIANGLE] [point ; point ; point ]");
-                        Object temp_tri = IntermediateCodeGenerator.addTerceto("TRI_P1_P2", p1, p2);
-                        RESULT = IntermediateCodeGenerator.addTerceto("TRIANGLE", temp_tri, p3);
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("p1", p1);
+                        result.put("p2", p2);
+                        result.put("p3", p3);
+
+                        RESULT = result;
                     :};
 
-point ::= numeric_expression:x COMMA numeric_expression:y 
+point ::= expression:x COMMA expression:y 
                     {: 
-                        System.out.println("[POINT] Numeric Expression , Numeric Expression");
-                        RESULT = IntermediateCodeGenerator.addTerceto("POINT", x, y);
+                        System.out.println("[POINT] Expression , Expression");
+                        Map<String, Object> left = (Map<String, Object>) x;
+                        Map<String, Object> right = (Map<String, Object>) y;
+
+                        String typeL = (String) left.get("type");
+                        String typeR = (String) right.get("type");
+
+                        if(typeL == "Integer" || typeL == "Float")
+                        {
+                            if(typeR == "Integer" || typeR == "Float")
+                            {
+                                Object terceto = IntermediateCodeGenerator.addTerceto("POINT", left.get("value"), right.get("value"));
+
+                                Map<String, Object> result = new HashMap<>();
+                                result.put("value", terceto);
+                                result.put("type", "point");
+                                RESULT = result;
+                            }else
+                            {
+                                throw new RuntimeException("Tipos incompatibles en Punto: " + right.get("value") + ": "  + typeR);
+                            }
+                        }else
+                        {
+                            throw new RuntimeException("Tipos incompatibles en Punto: " + left.get("value") + ": "  + typeL);
+                        }
                     :};
 
 expression_list ::= expression:exp
                     {: 
                         System.out.println("[EXPRESSION LIST] Expression");
-                        java.util.List<Object> list = new java.util.ArrayList<>();
-                        list.add(exp);
-                        RESULT = list;
+                        java.util.ArrayList<Map<String, Object>> list = new java.util.ArrayList<>();
+                        list.add((Map<String, Object>)exp);
+
+                        Map<String, Object> expp = (Map<String, Object>) exp;
+                        String typeExpression = (String) expp.get("type");
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", list);
+                        result.put("type", typeExpression);
+
+                        RESULT = result;
                     :}
-                | expression_list:list COMMA expression:exp
+                | expression_list:elist COMMA expression:exp
                     {: 
                         System.out.println("[EXPRESSION LIST] Expression List , Expression");
-                        java.util.List<Object> tmp = (java.util.List<Object>) list;
-                        tmp.add(exp);
-                        RESULT = tmp;
+
+                        Map<String, Object> expressionList = (Map<String, Object>) elist;
+                        java.util.ArrayList<Map<String, Object>> list = (java.util.ArrayList<Map<String, Object>>) expressionList.get("value");
+                        list.add((Map<String, Object>)exp);
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", list);
+                        result.put("type", expressionList.get("type"));
+
+                        RESULT = result;
                     :};
 
 term ::= term:left MULT factor:right 
                     {: 
                         System.out.println("[TERM] Term * Factor"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("MULT", left, right);
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
+                            throw new RuntimeException("Tipos incompatibles en multiplicacion: " + typeL + " * " + typeR + ". Solo Integer o Float permitidos.");
+                        }
+
+                        String resultType = promoteNumericType(typeL, typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("MULT", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", resultType);
+                        RESULT = result;
                     :}
                 | term:left DIV factor:right 
                     {: 
                         System.out.println("[TERM] Term / Factor"); 
-                        RESULT = IntermediateCodeGenerator.addTerceto("DIV", left, right);
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
+                            throw new RuntimeException("Tipos incompatibles en division: " + typeL + " / " + typeR + ". Solo Integer o Float permitidos.");
+                        }
+
+                        String resultType = promoteNumericType(typeL, typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("DIV", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", resultType);
+                        RESULT = result;
                     :}
                 | factor:value 
                     {: 
+                        Map<String, Object> factor = (Map<String, Object>) value;
+                        String typeFactor = (String) factor.get("type");
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", factor.get("value"));
+                        result.put("type", typeFactor);
                         System.out.println("[TERM] Factor");
-                        RESULT = value; 
+                        RESULT = result; 
                     :};
 
 factor ::= IDENTIFIER:id 
                     {: 
                         System.out.println("[FACTOR] Identificador: " + id);
-                        RESULT = id;
+
+                        SymbolTableGenerator.Symbol sym_id = SymbolTableGenerator.getSymbol(id);
+                        if(sym_id.getType() == "VARIABLE")
+                            throw new RuntimeException("Variable no seteada: " + sym_id.getName());
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", id);
+                        result.put("type", sym_id.getType());
+                        RESULT = result;
+
                     :}
                 | INTEGER_CONSTANT:intc {: 
                         System.out.println("[FACTOR] Constante Entera: " + intc);
-                        RESULT = intc;
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", intc);
+                        result.put("type", "Integer");
+                        RESULT = result;
                     :}
                 | FLOAT_CONSTANT:floatc 
                     {: 
                         System.out.println("[FACTOR] Constante Float: " + floatc);
-                        RESULT = floatc;
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", floatc);
+                        result.put("type", "Float");
+                        RESULT = result;
                     :}
+                | BOOLEAN_CONSTANT:boolc
+                {:
+                    System.out.println("[FACTOR] Constante Booleana: " + boolc);
+
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("value", boolc);
+                    result.put("type", "Boolean");
+                    RESULT = result;
+                :}    
                 | OPEN_BRACKET expression:exp CLOSE_BRACKET 
                     {: 
+                        Map<String, Object> expression = (Map<String, Object>) exp;
+                        String typeExpression = (String) expression.get("type");
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", expression.get("value"));
+                        result.put("type", typeExpression);
                         System.out.println("[FACTOR] ( Expression )"); 
-                        RESULT = "(" + exp + ")"; 
-                    :};
-
-// Numeric-only expressions
-numeric_expression ::= numeric_expression:left PLUS numeric_term:right 
-                    {: 
-                        System.out.println("[NUMERIC EXPRESSION] Numeric Expression + Numeric Term");
-                        RESULT = IntermediateCodeGenerator.addTerceto("ADD", left, right);
-                    :}
-                | numeric_expression:left SUB numeric_term:right 
-                    {: 
-                        System.out.println("[NUMERIC EXPRESSION] Numeric Expression - Numeric Term");
-                        RESULT = IntermediateCodeGenerator.addTerceto("SUB", left, right);
-                    :}
-                | numeric_term:term 
-                    {: 
-                        System.out.println("[NUMERIC EXPRESSION] Numeric Term");
-                        RESULT = term; 
-                    :};
-
-numeric_term ::= numeric_term:left MULT numeric_factor:right 
-                    {: 
-                        System.out.println("[NUMERIC TERM] Numeric Term * Numeric Factor");
-                        RESULT = IntermediateCodeGenerator.addTerceto("MULT", left, right);
-                    :}
-                | numeric_term:left DIV numeric_factor:right 
-                    {: 
-                        System.out.println("[NUMERIC TERM] Numeric Term / Numeric Factor");
-                        RESULT = IntermediateCodeGenerator.addTerceto("DIV", left, right);
-                    :}
-                | numeric_factor:value 
-                    {: 
-                        System.out.println("[NUMERIC TERM] Numeric Factor");
-                        RESULT = value; 
-                    :};
-
-numeric_factor ::= IDENTIFIER:id 
-                    {: 
-                        System.out.println("[NUMERIC FACTOR] Identifier: " + id);
-                        RESULT = id; 
-                    :}
-                | INTEGER_CONSTANT:intc 
-                    {: 
-                        System.out.println("[NUMERIC FACTOR]  Integer Constant: " + intc);
-                        RESULT = intc; 
-                    :}
-                | FLOAT_CONSTANT:floatc 
-                    {: 
-                        System.out.println("[NUMERIC FACTOR] Float Constant: " + floatc);
-                        RESULT = floatc; 
-                    :}
-                | OPEN_BRACKET numeric_expression:exp CLOSE_BRACKET 
-                    {: 
-                        System.out.println("[NUMERIC FACTOR] Numeric Expression: " + exp);
-                        RESULT = exp; 
+                        RESULT = result; 
                     :};
 
 condition ::= simple_condition
@@ -367,48 +892,167 @@ condition ::= simple_condition
                         System.out.println("[CONDITION] Compound Condition"); 
                     :};
 
-simple_condition ::= numeric_expression:left LESS numeric_expression:right
+simple_condition ::= expression:left LESS expression:right
                     {: 
+                        System.out.println("[SIMPLE CONDITION] Expression < Expression"); 
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
+                            throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " < " + typeR + ". Solo Integer o Float permitidos.");
+                        }
+
+                        String resultType = promoteNumericType(typeL, typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("LESS", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", resultType);
+                        RESULT = result;
                         System.out.println("[SIMPLE CONDITION] Expression < Expression");
                         IntermediateCodeGenerator.addTerceto("CMP", left, right);
                         RESULT = IntermediateCodeGenerator.addTerceto("BGE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
                          IntermediateCodeGenerator.pushSalto(index);
                     :}
-                | numeric_expression:left GREATER numeric_expression:right
+                | expression:left GREATER expression:right
                     {: 
+                        System.out.println("[SIMPLE CONDITION] Expression > Expression"); 
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
+                            throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " > " + typeR + ". Solo Integer o Float permitidos.");
+                        }
+
+                        String resultType = promoteNumericType(typeL, typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("GREATER", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", resultType);
+                        RESULT = result;
                         System.out.println("[SIMPLE CONDITION] Expression > Expression");
                         IntermediateCodeGenerator.addTerceto("CMP", left, right);
                         RESULT = IntermediateCodeGenerator.addTerceto("BLE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
                          IntermediateCodeGenerator.pushSalto(index);
                     :}
-                | numeric_expression:left EQUAL numeric_expression:right
+                | expression:left EQUAL expression:right
                     {: 
                         System.out.println("[SIMPLE CONDITION] Expression == Expression");
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
+                            throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " == " + typeR + ". Solo Integer o Float permitidos.");
+                        }
+
+                        String resultType = promoteNumericType(typeL, typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("EQUAL", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", resultType);
+                        RESULT = result;
                         IntermediateCodeGenerator.addTerceto("CMP", left, right);
                         RESULT = IntermediateCodeGenerator.addTerceto("BNE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
                          IntermediateCodeGenerator.pushSalto(index);
                     :}
-                | numeric_expression:left NOT_EQUAL numeric_expression:right
+                | expression:left NOT_EQUAL expression:right
                     {: 
+                        System.out.println("[SIMPLE CONDITION] Expression != Expression"); 
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
+                            throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " != " + typeR + ". Solo Integer o Float permitidos.");
+                        }
+
+                        String resultType = promoteNumericType(typeL, typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("NOT_EQUAL", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", resultType);
+                        RESULT = result;
                         System.out.println("[SIMPLE CONDITION] Expression != Expression");
                         IntermediateCodeGenerator.addTerceto("CMP", left, right); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BEQ", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
                          IntermediateCodeGenerator.pushSalto(index);
                     :}
-                | numeric_expression:left LESS_EQUAL numeric_expression:right
+                | expression:left LESS_EQUAL expression:right
                     {: 
+                        System.out.println("[SIMPLE CONDITION] Expression <= Expression"); 
+                        
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
+                            throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " <= " + typeR + ". Solo Integer o Float permitidos.");
+                        }
+
+                        String resultType = promoteNumericType(typeL, typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("LESS_EQUAL", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", resultType);
+                        RESULT = result;
                         System.out.println("[SIMPLE CONDITION] Expression <= Expression");
                         IntermediateCodeGenerator.addTerceto("CMP", left, right); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BGT", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
                          IntermediateCodeGenerator.pushSalto(index);
                     :}
-                | numeric_expression:left GREATER_EQUAL numeric_expression:right
+                | expression:left GREATER_EQUAL expression:right
                     {: 
+                        System.out.println("[SIMPLE CONDITION] Expression >= Expression"); 
+
+                        Map<String, Object> l = (Map<String, Object>) left;
+                        Map<String, Object> r = (Map<String, Object>) right;
+
+                        String typeL = (String) l.get("type");
+                        String typeR = (String) r.get("type");
+
+                        if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
+                            throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " >= " + typeR + ". Solo Integer o Float permitidos.");
+                        }
+
+                        String resultType = promoteNumericType(typeL, typeR);
+
+                        Object terceto = IntermediateCodeGenerator.addTerceto("GREATER_EQUAL", l.get("value"), r.get("value"));
+
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("value", terceto);
+                        result.put("type", resultType);
+                        RESULT = result;
                         System.out.println("[SIMPLE CONDITION] Expression >= Expression");
                         IntermediateCodeGenerator.addTerceto("CMP", left, right); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BLT", "[PENDIENTE]", null);
@@ -489,7 +1133,7 @@ identifier_list ::= IDENTIFIER:id
 type_specifier ::= TYPE_INT 
                     {: 
                         System.out.println("[TYPE SPECIFIER] Type Integer" );
-                        RESULT = "Int"; 
+                        RESULT = "Integer"; 
                     :}
                 | TYPE_FLOAT 
                     {: 
