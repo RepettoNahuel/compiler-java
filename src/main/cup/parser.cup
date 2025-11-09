@@ -9,7 +9,6 @@ class Parser;
 
 parser code {:
     private final SymbolTableGenerator symbolTable = new SymbolTableGenerator();
-    private Stack<Integer> jumpStack = new Stack<>();
 :}
 
 /*** Elementos Terminales ***/
@@ -150,30 +149,24 @@ if_statement ::=
                 OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET
                 else_clause
                     {:
-                        if(!jumpStack.isEmpty()){
-                            int index = jumpStack.pop();
-                            int finElse = IntermediateCodeGenerator.getNextIndex();
-                            IntermediateCodeGenerator.completarSaltoCmp(index, finElse);
-                        }
-                    /*
-                        if (!IntermediateCodeGenerator.isSaltoEmpty()) {
+                        while(!IntermediateCodeGenerator.isSaltoEmpty()) {
                             int tercetoPendiente = IntermediateCodeGenerator.popSalto();    
                             int finIfElse = IntermediateCodeGenerator.getNextIndex();
-                            IntermediateCodeGenerator.completarSalto(tercetoPendiente, finIfElse);  
+                            IntermediateCodeGenerator.completarSaltoCmp(tercetoPendiente, finIfElse);  
                         }
-                        */
                     :};
 
 else_clause ::= /* vacío */
                 | ELSE
                     {:  
-                        IntermediateCodeGenerator.addTerceto("BRANCH", null, "[PENDIENTE]");       
+                        IntermediateCodeGenerator.addTerceto("BI","[PENDIENTE]", null);       
                         if (!IntermediateCodeGenerator.isSaltoEmpty()) {
                             int ifFalsePendiente = IntermediateCodeGenerator.popSalto();
                             int inicioElse = IntermediateCodeGenerator.getNextIndex();
-                            IntermediateCodeGenerator.completarSalto(ifFalsePendiente, inicioElse);
+                            IntermediateCodeGenerator.completarSaltoCmp(ifFalsePendiente, inicioElse);
                         }
                         IntermediateCodeGenerator.pushSalto(IntermediateCodeGenerator.getLastIndex());
+
                     :}
                 OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET;                    
 
@@ -365,7 +358,9 @@ condition ::= simple_condition
                 | NOT simple_condition 
                     {: 
                         System.out.println("[CONDITION] NOT Simple Condition");
+                        int index = IntermediateCodeGenerator.popSalto();
                         IntermediateCodeGenerator.flipJumpOperator();
+                        IntermediateCodeGenerator.pushSalto(index);
                     :}
                 | compound_condition 
                     {: 
@@ -378,7 +373,7 @@ simple_condition ::= numeric_expression:left LESS numeric_expression:right
                         IntermediateCodeGenerator.addTerceto("CMP", left, right);
                         RESULT = IntermediateCodeGenerator.addTerceto("BGE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
-                        jumpStack.push(index);
+                         IntermediateCodeGenerator.pushSalto(index);
                     :}
                 | numeric_expression:left GREATER numeric_expression:right
                     {: 
@@ -386,7 +381,7 @@ simple_condition ::= numeric_expression:left LESS numeric_expression:right
                         IntermediateCodeGenerator.addTerceto("CMP", left, right);
                         RESULT = IntermediateCodeGenerator.addTerceto("BLE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
-                        jumpStack.push(index);
+                         IntermediateCodeGenerator.pushSalto(index);
                     :}
                 | numeric_expression:left EQUAL numeric_expression:right
                     {: 
@@ -394,7 +389,7 @@ simple_condition ::= numeric_expression:left LESS numeric_expression:right
                         IntermediateCodeGenerator.addTerceto("CMP", left, right);
                         RESULT = IntermediateCodeGenerator.addTerceto("BNE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
-                        jumpStack.push(index);
+                         IntermediateCodeGenerator.pushSalto(index);
                     :}
                 | numeric_expression:left NOT_EQUAL numeric_expression:right
                     {: 
@@ -402,7 +397,7 @@ simple_condition ::= numeric_expression:left LESS numeric_expression:right
                         IntermediateCodeGenerator.addTerceto("CMP", left, right); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BEQ", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
-                        jumpStack.push(index);
+                         IntermediateCodeGenerator.pushSalto(index);
                     :}
                 | numeric_expression:left LESS_EQUAL numeric_expression:right
                     {: 
@@ -410,7 +405,7 @@ simple_condition ::= numeric_expression:left LESS numeric_expression:right
                         IntermediateCodeGenerator.addTerceto("CMP", left, right); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BGT", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
-                        jumpStack.push(index);
+                         IntermediateCodeGenerator.pushSalto(index);
                     :}
                 | numeric_expression:left GREATER_EQUAL numeric_expression:right
                     {: 
@@ -418,18 +413,36 @@ simple_condition ::= numeric_expression:left LESS numeric_expression:right
                         IntermediateCodeGenerator.addTerceto("CMP", left, right); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BLT", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
-                        jumpStack.push(index);
+                         IntermediateCodeGenerator.pushSalto(index);
                     :};
 
-compound_condition ::= simple_condition:left AND simple_condition:right 
+compound_condition ::= simple_condition:left
+
+                    AND simple_condition:right 
                     {: 
                         System.out.println("[COMPOUND CONDITION] Condition AND Condition"); 
                         //if (!lyc.compiler.files.Utils.isBoolean(left) || !lyc.compiler.files.Utils.isBoolean(right)) throw new RuntimeException("Operador AND aplicado a expresiones no booleanas");
                     :}
-                | simple_condition:left OR simple_condition:right
+                    | simple_condition:left 
+                    {:
+                        int leftFalseJump = IntermediateCodeGenerator.popSalto();
+                        IntermediateCodeGenerator.addTerceto("BI", "[PENDIENTE_BODY]", null);
+                        int bodyJump = IntermediateCodeGenerator.getLastIndex();
+
+                        IntermediateCodeGenerator.pushSalto(bodyJump);
+
+                        int startOfRight = IntermediateCodeGenerator.getNextIndex();
+                        IntermediateCodeGenerator.completarSaltoCmp(leftFalseJump, startOfRight);
+                    :}
+                    OR simple_condition:right
                     {: 
                         System.out.println("[COMPOUND CONDITION] Condition OR Condition");
-                        //if (!lyc.compiler.files.Utils.isBoolean(left) || !lyc.compiler.files.Utils.isBoolean(right)) throw new RuntimeException("Operador AND aplicado a expresiones no booleanas"); 
+                        //if (!lyc.compiler.files.Utils.isBoolean(left) || !lyc.compiler.files.Utils.isBoolean(right)) throw new RuntimeException("Operador AND aplicado a expresiones no booleanas");
+                        int false_B = IntermediateCodeGenerator.popSalto();
+                        int body_A = IntermediateCodeGenerator.popSalto();
+                        int startOfBody = IntermediateCodeGenerator.getNextIndex();
+                        IntermediateCodeGenerator.completarSaltoCmp(body_A, startOfBody);
+                        IntermediateCodeGenerator.pushSalto(false_B);
                     :};
 
 init_block ::= INIT OPEN_CURLY_BRACKET variable_declaration_list CLOSE_CURLY_BRACKET 
