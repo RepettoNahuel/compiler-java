@@ -197,7 +197,7 @@ if_statement ::=
                         while(!IntermediateCodeGenerator.isSaltoEmpty()) {
                             int tercetoPendiente = IntermediateCodeGenerator.popSalto();    
                             int finIfElse = IntermediateCodeGenerator.getNextIndex();
-                            IntermediateCodeGenerator.completarSaltoCmp(tercetoPendiente, finIfElse);  
+                            IntermediateCodeGenerator.rellenarSalto(tercetoPendiente, finIfElse);  
                         }
                     :};
 
@@ -208,7 +208,7 @@ else_clause ::= /* vacío */
                         if (!IntermediateCodeGenerator.isSaltoEmpty()) {
                             int ifFalsePendiente = IntermediateCodeGenerator.popSalto();
                             int inicioElse = IntermediateCodeGenerator.getNextIndex();
-                            IntermediateCodeGenerator.completarSaltoCmp(ifFalsePendiente, inicioElse);
+                            IntermediateCodeGenerator.rellenarSalto(ifFalsePendiente, inicioElse);
                         }
                         IntermediateCodeGenerator.pushSalto(IntermediateCodeGenerator.getLastIndex());
 
@@ -1076,7 +1076,7 @@ compound_condition ::= simple_condition:left
                         IntermediateCodeGenerator.pushSalto(bodyJump);
 
                         int startOfRight = IntermediateCodeGenerator.getNextIndex();
-                        IntermediateCodeGenerator.completarSaltoCmp(leftFalseJump, startOfRight);
+                        IntermediateCodeGenerator.rellenarSalto(leftFalseJump, startOfRight);
                     :}
                     OR simple_condition:right
                     {: 
@@ -1085,7 +1085,7 @@ compound_condition ::= simple_condition:left
                         int false_B = IntermediateCodeGenerator.popSalto();
                         int body_A = IntermediateCodeGenerator.popSalto();
                         int startOfBody = IntermediateCodeGenerator.getNextIndex();
-                        IntermediateCodeGenerator.completarSaltoCmp(body_A, startOfBody);
+                        IntermediateCodeGenerator.rellenarSalto(body_A, startOfBody);
                         IntermediateCodeGenerator.pushSalto(false_B);
                     :};
 

@@ -69,6 +69,19 @@ public class IntermediateCodeGenerator implements FileGenerator {
     return "T" + (++tempCounter);
     }
 
+    public static void flipJumpOperator(){
+        int index = getLastIndex();
+        String[] terceto = tercetosMap.get(index);
+        if (terceto != null){
+            String currentOperator = terceto[0];
+            String flippedOp = FlipJumpOperatorMap.get(currentOperator);
+
+            if (flippedOp != null) {
+                terceto[0] = flippedOp;
+            }
+        }
+    }
+
     @Override
     public void generate(FileWriter fileWriter) throws IOException {
         for (Map.Entry<Integer, String[]> entry : tercetosMap.entrySet()) {
