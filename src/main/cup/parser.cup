@@ -216,24 +216,22 @@ else_clause ::= /* vacío */
                 OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET;                    
 
 
-while_statement ::=
-    WHILE
-    {:
-        IntermediateCodeGenerator.pushSalto(IntermediateCodeGenerator.getNextIndex());
-    :}
-    OPEN_BRACKET condition:cond CLOSE_BRACKET
-    {:
-        IntermediateCodeGenerator.addTerceto("IF_FALSE", "[" + IntermediateCodeGenerator.getLastIndex() + "]", "[PENDIENTE]");
-        IntermediateCodeGenerator.pushSalto(IntermediateCodeGenerator.getLastIndex());
-    :}
-    OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET
-    {:
-        int ifFalsePendiente = IntermediateCodeGenerator.popSalto();
-        int inicioWhile = IntermediateCodeGenerator.popSalto();
-        IntermediateCodeGenerator.addTerceto("BRANCH", null, "[" + inicioWhile + "]");
-        int finWhile = IntermediateCodeGenerator.getNextIndex();
-        IntermediateCodeGenerator.completarSalto(ifFalsePendiente, finWhile);
-    :};
+while_statement ::= WHILE
+                    {:
+                        String et = IntermediateCodeGenerator.addTerceto("ET", null, null);
+                        IntermediateCodeGenerator.pushEtWhile(IntermediateCodeGenerator.getLastIndex());
+                    :}
+                    OPEN_BRACKET condition:cond CLOSE_BRACKET
+                    {:
+                        IntermediateCodeGenerator.pushSalto(IntermediateCodeGenerator.getLastIndex());
+                    :}
+                    OPEN_CURLY_BRACKET statements CLOSE_CURLY_BRACKET
+                    {:
+                        int saltoSalida = IntermediateCodeGenerator.popSalto();
+                        int et = IntermediateCodeGenerator.popEtWhile();
+                        IntermediateCodeGenerator.addTerceto("BI", "[" + et + "]", null);
+                        IntermediateCodeGenerator.completarSalto(saltoSalida, IntermediateCodeGenerator.getNextIndex());
+                    :};
 
 read_statement ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET 
                     {: 

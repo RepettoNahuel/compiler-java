@@ -21,6 +21,7 @@ public class IntermediateCodeGenerator implements FileGenerator {
     private static int tercNumber = 0;
     private static final Stack<Integer> pilaSaltos = new Stack<>();
     private static int tempCounter = 0;
+    private static Stack<Integer> pilaEtWhile = new Stack<>();
 
     public static String addTerceto(String op, Object arg1, Object arg2) {
         String sArg1 = arg1 != null ? arg1.toString() : null;
@@ -58,7 +59,7 @@ public class IntermediateCodeGenerator implements FileGenerator {
     }
 
     public static int getNextIndex() {
-        return tercNumber + 1;
+        return tercNumber ;
     }
 
     public static boolean isSaltoEmpty() {
@@ -80,6 +81,14 @@ public class IntermediateCodeGenerator implements FileGenerator {
                 terceto[0] = flippedOp;
             }
         }
+    }
+
+    public static void pushEtWhile(int index) {
+        pilaEtWhile.push(index);
+    }
+
+    public static int popEtWhile() {
+        return pilaEtWhile.pop();
     }
 
     @Override
