@@ -924,7 +924,7 @@ simple_condition ::= expression:left LESS expression:right
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " > " + typeR + ". Solo Integer o Float permitidos.");
                         }
 
-                        IntermediateCodeGenerator.addTerceto("CMP", left, right);
+                        IntermediateCodeGenerator.addTerceto("CMP", l.get("value"), r.get("value"));
                         RESULT = IntermediateCodeGenerator.addTerceto("BLE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
                         IntermediateCodeGenerator.pushSalto(index);
@@ -943,7 +943,7 @@ simple_condition ::= expression:left LESS expression:right
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " == " + typeR + ". Solo Integer o Float permitidos.");
                         }
 
-                        IntermediateCodeGenerator.addTerceto("CMP", left, right);
+                        IntermediateCodeGenerator.addTerceto("CMP", l.get("value"), r.get("value"));
                         RESULT = IntermediateCodeGenerator.addTerceto("BNE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
                         IntermediateCodeGenerator.pushSalto(index);
@@ -962,7 +962,7 @@ simple_condition ::= expression:left LESS expression:right
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " != " + typeR + ". Solo Integer o Float permitidos.");
                         }
                     
-                        IntermediateCodeGenerator.addTerceto("CMP", left, right); 
+                        IntermediateCodeGenerator.addTerceto("CMP", l.get("value"), r.get("value")); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BEQ", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
                         IntermediateCodeGenerator.pushSalto(index);
@@ -981,7 +981,7 @@ simple_condition ::= expression:left LESS expression:right
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " <= " + typeR + ". Solo Integer o Float permitidos.");
                         }
 
-                        IntermediateCodeGenerator.addTerceto("CMP", left, right); 
+                        IntermediateCodeGenerator.addTerceto("CMP", l.get("value"), r.get("value")); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BGT", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
                          IntermediateCodeGenerator.pushSalto(index);
@@ -1000,7 +1000,7 @@ simple_condition ::= expression:left LESS expression:right
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " >= " + typeR + ". Solo Integer o Float permitidos.");
                         }
 
-                        IntermediateCodeGenerator.addTerceto("CMP", left, right); 
+                        IntermediateCodeGenerator.addTerceto("CMP", l.get("value"), r.get("value")); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BLT", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
                          IntermediateCodeGenerator.pushSalto(index);
