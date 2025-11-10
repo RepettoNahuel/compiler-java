@@ -905,20 +905,12 @@ simple_condition ::= expression:left LESS expression:right
                         if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " < " + typeR + ". Solo Integer o Float permitidos.");
                         }
-
-                        String resultType = promoteNumericType(typeL, typeR);
-
-                        Object terceto = IntermediateCodeGenerator.addTerceto("LESS", l.get("value"), r.get("value"));
-
-                        Map<String, Object> result = new HashMap<>();
-                        result.put("value", terceto);
-                        result.put("type", resultType);
-                        RESULT = result;
-                        System.out.println("[SIMPLE CONDITION] Expression < Expression");
-                        IntermediateCodeGenerator.addTerceto("CMP", left, right);
+                        
+                        IntermediateCodeGenerator.addTerceto("CMP", l.get("value"), r.get("value"));
+                  
                         RESULT = IntermediateCodeGenerator.addTerceto("BGE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
-                         IntermediateCodeGenerator.pushSalto(index);
+                        IntermediateCodeGenerator.pushSalto(index);
                     :}
                 | expression:left GREATER expression:right
                     {: 
@@ -934,19 +926,10 @@ simple_condition ::= expression:left LESS expression:right
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " > " + typeR + ". Solo Integer o Float permitidos.");
                         }
 
-                        String resultType = promoteNumericType(typeL, typeR);
-
-                        Object terceto = IntermediateCodeGenerator.addTerceto("GREATER", l.get("value"), r.get("value"));
-
-                        Map<String, Object> result = new HashMap<>();
-                        result.put("value", terceto);
-                        result.put("type", resultType);
-                        RESULT = result;
-                        System.out.println("[SIMPLE CONDITION] Expression > Expression");
                         IntermediateCodeGenerator.addTerceto("CMP", left, right);
                         RESULT = IntermediateCodeGenerator.addTerceto("BLE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
-                         IntermediateCodeGenerator.pushSalto(index);
+                        IntermediateCodeGenerator.pushSalto(index);
                     :}
                 | expression:left EQUAL expression:right
                     {: 
@@ -962,18 +945,10 @@ simple_condition ::= expression:left LESS expression:right
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " == " + typeR + ". Solo Integer o Float permitidos.");
                         }
 
-                        String resultType = promoteNumericType(typeL, typeR);
-
-                        Object terceto = IntermediateCodeGenerator.addTerceto("EQUAL", l.get("value"), r.get("value"));
-
-                        Map<String, Object> result = new HashMap<>();
-                        result.put("value", terceto);
-                        result.put("type", resultType);
-                        RESULT = result;
                         IntermediateCodeGenerator.addTerceto("CMP", left, right);
                         RESULT = IntermediateCodeGenerator.addTerceto("BNE", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
-                         IntermediateCodeGenerator.pushSalto(index);
+                        IntermediateCodeGenerator.pushSalto(index);
                     :}
                 | expression:left NOT_EQUAL expression:right
                     {: 
@@ -988,20 +963,11 @@ simple_condition ::= expression:left LESS expression:right
                         if (!NUMERIC_TYPES.contains(typeL) || !NUMERIC_TYPES.contains(typeR)) {
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " != " + typeR + ". Solo Integer o Float permitidos.");
                         }
-
-                        String resultType = promoteNumericType(typeL, typeR);
-
-                        Object terceto = IntermediateCodeGenerator.addTerceto("NOT_EQUAL", l.get("value"), r.get("value"));
-
-                        Map<String, Object> result = new HashMap<>();
-                        result.put("value", terceto);
-                        result.put("type", resultType);
-                        RESULT = result;
-                        System.out.println("[SIMPLE CONDITION] Expression != Expression");
+                    
                         IntermediateCodeGenerator.addTerceto("CMP", left, right); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BEQ", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
-                         IntermediateCodeGenerator.pushSalto(index);
+                        IntermediateCodeGenerator.pushSalto(index);
                     :}
                 | expression:left LESS_EQUAL expression:right
                     {: 
@@ -1017,15 +983,6 @@ simple_condition ::= expression:left LESS expression:right
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " <= " + typeR + ". Solo Integer o Float permitidos.");
                         }
 
-                        String resultType = promoteNumericType(typeL, typeR);
-
-                        Object terceto = IntermediateCodeGenerator.addTerceto("LESS_EQUAL", l.get("value"), r.get("value"));
-
-                        Map<String, Object> result = new HashMap<>();
-                        result.put("value", terceto);
-                        result.put("type", resultType);
-                        RESULT = result;
-                        System.out.println("[SIMPLE CONDITION] Expression <= Expression");
                         IntermediateCodeGenerator.addTerceto("CMP", left, right); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BGT", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
@@ -1045,15 +1002,6 @@ simple_condition ::= expression:left LESS expression:right
                             throw new RuntimeException("Tipos incompatibles en comparacion: " + typeL + " >= " + typeR + ". Solo Integer o Float permitidos.");
                         }
 
-                        String resultType = promoteNumericType(typeL, typeR);
-
-                        Object terceto = IntermediateCodeGenerator.addTerceto("GREATER_EQUAL", l.get("value"), r.get("value"));
-
-                        Map<String, Object> result = new HashMap<>();
-                        result.put("value", terceto);
-                        result.put("type", resultType);
-                        RESULT = result;
-                        System.out.println("[SIMPLE CONDITION] Expression >= Expression");
                         IntermediateCodeGenerator.addTerceto("CMP", left, right); 
                         RESULT = IntermediateCodeGenerator.addTerceto("BLT", "[PENDIENTE]", null);
                         int index = IntermediateCodeGenerator.getLastIndex();
