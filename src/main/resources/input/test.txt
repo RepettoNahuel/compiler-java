@@ -31,27 +31,34 @@ write("ewr")
 write(var1)
 
 a1 := 1.1 
+a := 9.9
 b := 2
 c := 3.3
 d := "anitalavalatina"
 l := 8
 
-
+write("Condicion simple negada -> (not a > b)")
 if (not a > b)
 {
     write("a no es mas grande que b")
 }
 
+write("Condicion AND Condicion -> (a > b and c > b)")
 if (a > b and c > b)
 {
     write("a es mas grande que b y c es mas grande que b")
 }
 
+write("Condicion OR Condicion -> (a > b or c > b)")
 if (a > b or c > b)
 {
     write("a es mas grande que b o c es mas grande que b")
 }
 
+b := 10
+a := 9.9
+
+write("Condiciones anidadas con else")
 if (b > a)
 {
     if(c > b)
@@ -72,11 +79,17 @@ else
     write("a es mas chico o igual a b")
 }
 
+
+a := 5.5
+b := 1 
+
+write("While ...")
 while (a > b)
 {
     write("a es mas grande que b")
     a := a - 1
 }
+write("FIN While")
 
 a := 2.2
 b := 3

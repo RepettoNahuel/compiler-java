@@ -230,7 +230,8 @@ while_statement ::= WHILE
                         int saltoSalida = IntermediateCodeGenerator.popSalto();
                         int et = IntermediateCodeGenerator.popEtWhile();
                         IntermediateCodeGenerator.addTerceto("BI", "[" + et + "]", null);
-                        IntermediateCodeGenerator.completarSalto(saltoSalida, IntermediateCodeGenerator.getNextIndex());
+                        //IntermediateCodeGenerator.completarSalto(saltoSalida, IntermediateCodeGenerator.getNextIndex());
+                        IntermediateCodeGenerator.rellenarSalto(saltoSalida, IntermediateCodeGenerator.getNextIndex()); 
                     :};
 
 read_statement ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET 
@@ -1010,8 +1011,7 @@ compound_condition ::= simple_condition:left
 
                     AND simple_condition:right 
                     {: 
-                        System.out.println("[COMPOUND CONDITION] Condition AND Condition"); 
-                        //if (!lyc.compiler.files.Utils.isBoolean(left) || !lyc.compiler.files.Utils.isBoolean(right)) throw new RuntimeException("Operador AND aplicado a expresiones no booleanas");
+                        System.out.println("[COMPOUND CONDITION] Condition AND Condition");                         
                     :}
                     | simple_condition:left 
                     {:
@@ -1026,8 +1026,7 @@ compound_condition ::= simple_condition:left
                     :}
                     OR simple_condition:right
                     {: 
-                        System.out.println("[COMPOUND CONDITION] Condition OR Condition");
-                        //if (!lyc.compiler.files.Utils.isBoolean(left) || !lyc.compiler.files.Utils.isBoolean(right)) throw new RuntimeException("Operador AND aplicado a expresiones no booleanas");
+                        System.out.println("[COMPOUND CONDITION] Condition OR Condition");                    
                         int false_B = IntermediateCodeGenerator.popSalto();
                         int body_A = IntermediateCodeGenerator.popSalto();
                         int startOfBody = IntermediateCodeGenerator.getNextIndex();
