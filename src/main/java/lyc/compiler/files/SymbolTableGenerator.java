@@ -42,6 +42,10 @@ public class SymbolTableGenerator implements FileGenerator{
     private static final Map<String, Symbol> symbolTable = new HashMap<>();
     private static final Map<String, Symbol> symbolTableDynamic = new HashMap<>();
 
+    public static Map<String, Symbol> getSymbolTable() {
+        return symbolTable;
+    }
+
     @Override
     public void generate(FileWriter fileWriter) throws IOException {
         fileWriter.write("Nombre | Tipo | Valor | Longitud\n");

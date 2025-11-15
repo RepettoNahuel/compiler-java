@@ -1,3 +1,10 @@
+init {
+    prueba : String
+    flo: Float
+}
+
+prueba2 := "Pruebaaa"
+
 z := 2
 x := 3.8
 a := -4.1
