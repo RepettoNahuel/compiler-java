@@ -86,10 +86,7 @@ public class AsmCodeGenerator implements FileGenerator {
             .append("START:\n")
             .append("\tMOV AX,@DATA\n")
             .append("\tMOV DS,AX\n")
-            .append("\tMOV ES,AX\n\n");
-        
-        code.append("\tacá meter toda la logica para generar el código assembles correspondiente a cada terceto... \n\n");
-        
+            .append("\tMOV ES,AX\n\n");       
         
         for (Map.Entry<Integer, String[]> entry : IntermediateCodeGenerator.getTercetosMap().entrySet()) {
             int index = entry.getKey();
@@ -102,6 +99,7 @@ public class AsmCodeGenerator implements FileGenerator {
             if (a1 != null && a1.length() >= 2 && a1.charAt(0) == '[' && a1.charAt(a1.length() - 1) == ']') { 
                 key = Integer.parseInt(a1.substring(1, a1.length() - 1));
                 value = mapaAux.get(key);
+
                 if (value != null) {          
                     aux1 = value;
                 } else {
@@ -115,6 +113,7 @@ public class AsmCodeGenerator implements FileGenerator {
             if (a2 != null && a2.length() >= 2 && a2.charAt(0) == '[' && a2.charAt(a2.length() - 1) == ']') { 
                 key = Integer.parseInt(a2.substring(1, a2.length() - 1));
                 value = mapaAux.get(key);
+
                 if (value != null) {          
                     aux2 = value;
                 } else {
@@ -125,22 +124,14 @@ public class AsmCodeGenerator implements FileGenerator {
                 aux2 = a2;
             }
 
-            ////Esto despues hay que borrarlo////
-            code.append("\t[")
-                        .append(index)
-                        .append("] = (")
-                        .append(op).append(", ")
-                        .append(a1).append(", ")
-                        .append(a2).append(")\n\n"); 
-            /////////////////////////////////////
-
             switch (op) {
                 case "ADD":       
                     nroAux++;                    
                     varAux = "@aux" + nroAux;        
                     code.append("\tMOV R1, " + aux1 + "\n");
                     code.append("\tADD R1, " + aux2 + "\n");
-                    code.append("\tMOV " + varAux + ", R1\n\n");                   
+                    code.append("\tMOV " + varAux + ", R1\n\n");       
+                    mapaAux.put(index, varAux);           
                     break;
 
                 case "SUB":
@@ -148,15 +139,17 @@ public class AsmCodeGenerator implements FileGenerator {
                     varAux = "@aux" + nroAux;        
                     code.append("\tMOV R1, " + aux1 + "\n");
                     code.append("\tSUB R1, " + aux2 + "\n");
-                    code.append("\tMOV " + varAux + ", R1\n\n");                   
+                    code.append("\tMOV " + varAux + ", R1\n\n");    
+                    mapaAux.put(index, varAux);               
                     break;
 
-                case "MUL":
+                case "MULT":
                     nroAux++;                    
                     varAux = "@aux" + nroAux;        
                     code.append("\tMOV R1, " + aux1 + "\n");
                     code.append("\tMUL R1, " + aux2 + "\n");
-                    code.append("\tMOV " + varAux + ", R1\n\n");                   
+                    code.append("\tMOV " + varAux + ", R1\n\n");  
+                    mapaAux.put(index, varAux);                 
                     break;
 
                 case "DIV":
@@ -164,7 +157,8 @@ public class AsmCodeGenerator implements FileGenerator {
                     varAux = "@aux" + nroAux;        
                     code.append("\tMOV R1, " + aux1 + "\n");
                     code.append("\tDIV R1, " + aux2 + "\n");
-                    code.append("\tMOV " + varAux + ", R1\n\n");                   
+                    code.append("\tMOV " + varAux + ", R1\n\n");  
+                    mapaAux.put(index, varAux);                 
                     break;
 
                 case "ASSIGN":    
@@ -173,9 +167,9 @@ public class AsmCodeGenerator implements FileGenerator {
                     break;
 
                 case "CMP":
-                    //completar          
+                    code.append("\tCMP " + aux1 + ", " + aux2 + "\n\n");      
                     break;
-
+/* 
                 case "BGE":
                     //completar
                     break;
@@ -203,11 +197,12 @@ public class AsmCodeGenerator implements FileGenerator {
                 case "BI":
                     //completar
                     break;
-
+*/
                 case "ET":
                     nroAux2++;
                     etiAux = "ETIQUETA" + nroAux2;
                     code.append("\n\t" + etiAux + ":\n\n"); 
+                    mapaAux.put(index, etiAux);
                     break;
 
                 case "WRITE":
@@ -230,15 +225,36 @@ public class AsmCodeGenerator implements FileGenerator {
                     break;
 
                 case "READ":
-                    //completar 
+                    SymbolTableGenerator.Symbol sym_aux2 = SymbolTableGenerator.getSymbol(aux1);
+                   
+                    if (sym_aux2 == null) {
+                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n");
+                        break;
+                    }
+
+                    switch (sym_aux2.getType()) {
+                        case "String" -> code.append("\tGetString " + aux1 + "\n\n"); 
+                        case "CTE_STRING" -> code.append("\tGetString " + aux1 + "\n\n");  
+                        case "Integer" -> code.append("\tGetFloat " + aux1 + "\n\n");  
+                        case "CTE_INTEGER" -> code.append("\tGetFloat " + aux1 + "\n\n");  
+                        case "Float" -> code.append("\tGetFloat " + aux1 + "\n\n"); 
+                        case "CTE_FLOAT" -> code.append("\tGetFloat " + aux1 + "\n\n");  
+                    }
+
                     break;
 
                 default:
+                    code.append("\t[")
+                        .append(index)
+                        .append("] = (")
+                        .append(op).append(", ")
+                        .append(a1).append(", ")
+                        .append(a2).append(")\n\n"); 
                     break;
             }
         }
         
-        code.append("\n\n\tMOV EAX, 4C00h\n")
+        code.append("\n\tMOV EAX, 4C00h\n")
             .append("\tINT 21h\n\n")
             .append("END START\n");
 
