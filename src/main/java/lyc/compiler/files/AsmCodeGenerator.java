@@ -74,12 +74,17 @@ public class AsmCodeGenerator implements FileGenerator {
         StringBuilder code = new StringBuilder();
 
         code.append(".CODE\n\n")
-            .append("START:\n\n");
+            .append("START:\n")
+            .append("\tMOV AX,@DATA\n")
+            .append("\tMOV DS,AX\n")
+            .append("\tMOV ES,AX\n\n");
+        
+        code.append("\tacá meter toda la logica para generar el código assembles correspondiente a cada terceto \n\n");
 
-        ///acá meter toda la logica para generar el código assembles correspondiente a cada terceto   
-        
-        
-        code.append("END START\n\n");
+        code.append("\tMOV EAX, 4C00h\n")
+            .append("\tINT 21h\n\n")
+            .append("END START\n");
+
         return code.toString();
     }
 }
