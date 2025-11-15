@@ -81,8 +81,6 @@ public class AsmCodeGenerator implements FileGenerator {
         String aux2;
         int key;
         String value;
-
-        Map<String, SymbolTableGenerator.Symbol> simbolos = SymbolTableGenerator.getSymbolTable();
                  
         code.append(".CODE\n\n")
             .append("START:\n")
@@ -209,16 +207,18 @@ public class AsmCodeGenerator implements FileGenerator {
                 case "ET":
                     nroAux2++;
                     etiAux = "ETIQUETA" + nroAux2;
-                    code.append("\n\n\t" + etiAux + ":\n\n"); 
+                    code.append("\n\t" + etiAux + ":\n\n"); 
                     break;
 
                 case "WRITE":
+                    SymbolTableGenerator.Symbol sym_aux = SymbolTableGenerator.getSymbol(aux1);
+                   
+                    if (sym_aux == null) {
+                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n");
+                        break;
+                    }
 
-                    code.append("\tDisplay " + aux1 + "\n\n");
-                /* 
-                    String type = simbolos.get(aux1).getType();
-
-                    switch (type) {
+                    switch (sym_aux.getType()) {
                         case "String" -> code.append("\tDisplayString " + aux1 + "\n\n"); 
                         case "CTE_STRING" -> code.append("\tDisplayString " + aux1 + "\n\n");  
                         case "Integer" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
@@ -226,7 +226,7 @@ public class AsmCodeGenerator implements FileGenerator {
                         case "Float" -> code.append("\tDisplayFloat " + aux1 + "\n\n"); 
                         case "CTE_FLOAT" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
                     }
-*/
+
                     break;
 
                 case "READ":

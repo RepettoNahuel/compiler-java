@@ -244,7 +244,8 @@ read_statement ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET
 write_statement ::= WRITE OPEN_BRACKET expression:exp CLOSE_BRACKET 
                     {: 
                         System.out.println("[WRITE] ( Expression ): " + exp); 
-                        IntermediateCodeGenerator.addTerceto("WRITE", exp, null);
+                        Map<String, Object> e = (Map<String, Object>) exp;
+                        IntermediateCodeGenerator.addTerceto("WRITE", e.get("value"), null);
                     :} 
                 | WRITE OPEN_BRACKET STRING_CONSTANT:sc CLOSE_BRACKET {: 
                         System.out.println("[WRITE] ( String Constante ): " + sc); 
