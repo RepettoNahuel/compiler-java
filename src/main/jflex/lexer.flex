@@ -217,6 +217,8 @@ Comment = "#+"([^#]|#+[^#+])*"+#"
                                   String contenido = yytext();
                                   int longitud = contenido.length() - 2; // excluye las comillas
 
+                                  contenido = contenido.substring(1, contenido.length() - 1);
+
                                   if (longitud > STRING_MAX_LENGTH) {
                                       throw new InvalidLengthException("String demasiado largo: " + contenido);
                                   }

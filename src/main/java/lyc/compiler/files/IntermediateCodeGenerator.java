@@ -23,6 +23,10 @@ public class IntermediateCodeGenerator implements FileGenerator {
     private static int tempCounter = 0;
     private static Stack<Integer> pilaEtWhile = new Stack<>();
 
+    public static Map<Integer, String[]> getTercetosMap() {
+        return tercetosMap;
+    }
+
     public static String addTerceto(String op, Object arg1, Object arg2) {
         String sArg1 = arg1 != null ? arg1.toString() : null;
         String sArg2 = arg2 != null ? arg2.toString() : null;

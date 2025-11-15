@@ -2,9 +2,8 @@ package lyc.compiler.files;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Hashtable;
-import java.util.List;
 
 public class AsmCodeGenerator implements FileGenerator {
 
@@ -72,16 +71,174 @@ public class AsmCodeGenerator implements FileGenerator {
 
      private String generateCode() {
         StringBuilder code = new StringBuilder();
+        Map<Integer, String> mapaAux = new HashMap<>();
+        int nroAux = 0;
+        int nroAux2 = 0;
+        String varAux;
+        String etiAux;
 
+        String aux1;
+        String aux2;
+        int key;
+        String value;
+
+        Map<String, SymbolTableGenerator.Symbol> simbolos = SymbolTableGenerator.getSymbolTable();
+                 
         code.append(".CODE\n\n")
             .append("START:\n")
             .append("\tMOV AX,@DATA\n")
             .append("\tMOV DS,AX\n")
             .append("\tMOV ES,AX\n\n");
         
-        code.append("\tacá meter toda la logica para generar el código assembles correspondiente a cada terceto \n\n");
+        code.append("\tacá meter toda la logica para generar el código assembles correspondiente a cada terceto... \n\n");
+        
+        
+        for (Map.Entry<Integer, String[]> entry : IntermediateCodeGenerator.getTercetosMap().entrySet()) {
+            int index = entry.getKey();
+            String[] t = entry.getValue();
 
-        code.append("\tMOV EAX, 4C00h\n")
+            String op = t[0];
+            String a1 = t[1];
+            String a2 = t[2];          
+
+            if (a1 != null && a1.length() >= 2 && a1.charAt(0) == '[' && a1.charAt(a1.length() - 1) == ']') { 
+                key = Integer.parseInt(a1.substring(1, a1.length() - 1));
+                value = mapaAux.get(key);
+                if (value != null) {          
+                    aux1 = value;
+                } else {
+                    aux1 = a1;              
+                }
+            }
+            else{
+                aux1 = a1;
+            }
+
+            if (a2 != null && a2.length() >= 2 && a2.charAt(0) == '[' && a2.charAt(a2.length() - 1) == ']') { 
+                key = Integer.parseInt(a2.substring(1, a2.length() - 1));
+                value = mapaAux.get(key);
+                if (value != null) {          
+                    aux2 = value;
+                } else {
+                    aux2 = a2;              
+                }
+            }
+            else{
+                aux2 = a2;
+            }
+
+            ////Esto despues hay que borrarlo////
+            code.append("\t[")
+                        .append(index)
+                        .append("] = (")
+                        .append(op).append(", ")
+                        .append(a1).append(", ")
+                        .append(a2).append(")\n\n"); 
+            /////////////////////////////////////
+
+            switch (op) {
+                case "ADD":       
+                    nroAux++;                    
+                    varAux = "@aux" + nroAux;        
+                    code.append("\tMOV R1, " + aux1 + "\n");
+                    code.append("\tADD R1, " + aux2 + "\n");
+                    code.append("\tMOV " + varAux + ", R1\n\n");                   
+                    break;
+
+                case "SUB":
+                    nroAux++;                    
+                    varAux = "@aux" + nroAux;        
+                    code.append("\tMOV R1, " + aux1 + "\n");
+                    code.append("\tSUB R1, " + aux2 + "\n");
+                    code.append("\tMOV " + varAux + ", R1\n\n");                   
+                    break;
+
+                case "MUL":
+                    nroAux++;                    
+                    varAux = "@aux" + nroAux;        
+                    code.append("\tMOV R1, " + aux1 + "\n");
+                    code.append("\tMUL R1, " + aux2 + "\n");
+                    code.append("\tMOV " + varAux + ", R1\n\n");                   
+                    break;
+
+                case "DIV":
+                    nroAux++;                    
+                    varAux = "@aux" + nroAux;        
+                    code.append("\tMOV R1, " + aux1 + "\n");
+                    code.append("\tDIV R1, " + aux2 + "\n");
+                    code.append("\tMOV " + varAux + ", R1\n\n");                   
+                    break;
+
+                case "ASSIGN":    
+                    code.append("\tMOV R1, " + aux2 + "\n");
+                    code.append("\tMOV " + aux1 + ", R1\n\n"); 
+                    break;
+
+                case "CMP":
+                    //completar          
+                    break;
+
+                case "BGE":
+                    //completar
+                    break;
+
+                case "BLE":
+                    //completar
+                    break;
+
+                case "BGT":
+                    //completar
+                    break;
+
+                case "BLT":
+                    //completar
+                    break;
+
+                case "BNE":
+                    //completar
+                    break;
+
+                case "BEQ":
+                    //completar
+                    break;
+
+                case "BI":
+                    //completar
+                    break;
+
+                case "ET":
+                    nroAux2++;
+                    etiAux = "ETIQUETA" + nroAux2;
+                    code.append("\n\n\t" + etiAux + ":\n\n"); 
+                    break;
+
+                case "WRITE":
+
+                    code.append("\tDisplay " + aux1 + "\n\n");
+                /* 
+                    String type = simbolos.get(aux1).getType();
+
+                    switch (type) {
+                        case "String" -> code.append("\tDisplayString " + aux1 + "\n\n"); 
+                        case "CTE_STRING" -> code.append("\tDisplayString " + aux1 + "\n\n");  
+                        case "Integer" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                        case "CTE_INTEGER" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                        case "Float" -> code.append("\tDisplayFloat " + aux1 + "\n\n"); 
+                        case "CTE_FLOAT" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                    }
+*/
+                    break;
+
+                case "READ":
+                    //completar 
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        
+        code.append("\n\n\tMOV EAX, 4C00h\n")
             .append("\tINT 21h\n\n")
             .append("END START\n");
 
