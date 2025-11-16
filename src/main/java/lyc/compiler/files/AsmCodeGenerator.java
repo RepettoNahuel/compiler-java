@@ -169,35 +169,35 @@ public class AsmCodeGenerator implements FileGenerator {
                 case "CMP":
                     code.append("\tCMP " + aux1 + ", " + aux2 + "\n\n");      
                     break;
-/* 
+
                 case "BGE":
-                    //completar
+                    code.append("\tJNB " + aux1 + "\n\n");
                     break;
 
                 case "BLE":
-                    //completar
+                    code.append("\tJBE " + aux1 + "\n\n");
                     break;
 
                 case "BGT":
-                    //completar
+                    code.append("\tJNBE " + aux1 + "\n\n");
                     break;
 
                 case "BLT":
-                    //completar
+                    code.append("\tJNAE " + aux1 + "\n\n");
                     break;
 
                 case "BNE":
-                    //completar
+                    code.append("\tJNE " + aux1 + "\n\n");
                     break;
 
                 case "BEQ":
-                    //completar
+                    code.append("\tJE " + aux1 + "\n\n");
                     break;
 
                 case "BI":
-                    //completar
+                    code.append("\tJMP " + aux1 + "\n\n");
                     break;
-*/
+
                 case "ET":
                     nroAux2++;
                     etiAux = "ETIQUETA" + nroAux2;

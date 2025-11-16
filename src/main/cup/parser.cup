@@ -665,7 +665,7 @@ expression ::= expression:left PLUS term:right
 
                             IntermediateCodeGenerator.addTerceto("CMP", val1, val2);
 
-                            String saltoTrue = IntermediateCodeGenerator.addTerceto("BE", null, null);
+                            String saltoTrue = IntermediateCodeGenerator.addTerceto("BEQ", null, null);
                             saltosTrue.add(saltoTrue);
                         }
 
