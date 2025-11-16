@@ -581,7 +581,7 @@ expression ::= expression:left PLUS term:right
 
                         Object temp_tr210 = IntermediateCodeGenerator.addTerceto("CMP", temp_tr29, temp_tr9);
 
-                        int salto = IntermediateCodeGenerator.getNextIndex() + 1;
+                        int salto = IntermediateCodeGenerator.getNextIndex() + 2;
 
                         Object temp_tr211 = IntermediateCodeGenerator.addTerceto("BLE", "[" + salto + "]", "");
 

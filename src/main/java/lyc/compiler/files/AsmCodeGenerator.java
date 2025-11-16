@@ -72,6 +72,7 @@ public class AsmCodeGenerator implements FileGenerator {
      private String generateCode() {
         StringBuilder code = new StringBuilder();
         Map<Integer, String> mapaAux = new HashMap<>();
+        Map<Integer, String> mapaEtiAux = new HashMap<>();
         int nroAux = 0;
         int nroAux2 = 0;
         String varAux;
@@ -81,6 +82,8 @@ public class AsmCodeGenerator implements FileGenerator {
         String aux2;
         int key;
         String value;
+        String nuevaEti;
+
                  
         code.append(".CODE\n\n")
             .append("START:\n")
@@ -123,6 +126,13 @@ public class AsmCodeGenerator implements FileGenerator {
             else{
                 aux2 = a2;
             }
+
+            //code.append("\tTERCETO ->[" + index + "]\n\n");  
+
+            nuevaEti = mapaEtiAux.get(index);
+            if (nuevaEti != null) {          
+                code.append(nuevaEti + ":\n\n"); 
+            } 
 
             switch (op) {
                 case "ADD":       
@@ -167,41 +177,111 @@ public class AsmCodeGenerator implements FileGenerator {
                     break;
 
                 case "CMP":
-                    code.append("\tCMP " + aux1 + ", " + aux2 + "\n\n");      
+                    code.append("\tCMP " + aux1 + ", " + aux2 + "\n");      
                     break;
 
                 case "BGE":
+                    if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
+                        
+                        etiAux = mapaEtiAux.get(Integer.parseInt(aux1.substring(1, aux1.length() - 1)));
+                        if (etiAux != null) {  
+                            nroAux2++;
+                            etiAux = "ETIQUETA" + nroAux2;
+                            mapaEtiAux.put(Integer.parseInt(aux1.substring(1, aux1.length() - 1)), etiAux);  
+                        } 
+                        aux1 = etiAux;                      
+                    }
                     code.append("\tJNB " + aux1 + "\n\n");
                     break;
 
                 case "BLE":
+                    if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
+                        
+                        etiAux = mapaEtiAux.get(Integer.parseInt(aux1.substring(1, aux1.length() - 1)));
+                        if (etiAux == null) {  
+                            nroAux2++;
+                            etiAux = "ETIQUETA" + nroAux2;
+                            mapaEtiAux.put(Integer.parseInt(aux1.substring(1, aux1.length() - 1)), etiAux);  
+                        } 
+                        aux1 = etiAux;                      
+                    }
                     code.append("\tJBE " + aux1 + "\n\n");
                     break;
 
                 case "BGT":
+                    if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
+                        
+                        etiAux = mapaEtiAux.get(Integer.parseInt(aux1.substring(1, aux1.length() - 1)));
+                        if (etiAux == null) {  
+                            nroAux2++;
+                            etiAux = "ETIQUETA" + nroAux2;
+                            mapaEtiAux.put(Integer.parseInt(aux1.substring(1, aux1.length() - 1)), etiAux);  
+                        } 
+                        aux1 = etiAux;                      
+                    }
                     code.append("\tJNBE " + aux1 + "\n\n");
                     break;
 
                 case "BLT":
+                   if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
+                        
+                        etiAux = mapaEtiAux.get(Integer.parseInt(aux1.substring(1, aux1.length() - 1)));
+                        if (etiAux == null) {  
+                            nroAux2++;
+                            etiAux = "ETIQUETA" + nroAux2;
+                            mapaEtiAux.put(Integer.parseInt(aux1.substring(1, aux1.length() - 1)), etiAux);  
+                        } 
+                        aux1 = etiAux;                      
+                    }
                     code.append("\tJNAE " + aux1 + "\n\n");
                     break;
 
                 case "BNE":
+                    if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
+                        
+                        etiAux = mapaEtiAux.get(Integer.parseInt(aux1.substring(1, aux1.length() - 1)));
+                        if (etiAux == null) {  
+                            nroAux2++;
+                            etiAux = "ETIQUETA" + nroAux2;
+                            mapaEtiAux.put(Integer.parseInt(aux1.substring(1, aux1.length() - 1)), etiAux);  
+                        } 
+                        aux1 = etiAux;                      
+                    }
                     code.append("\tJNE " + aux1 + "\n\n");
                     break;
 
                 case "BEQ":
+                    if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
+                        
+                        etiAux = mapaEtiAux.get(Integer.parseInt(aux1.substring(1, aux1.length() - 1)));
+                        if (etiAux == null) {  
+                            nroAux2++;
+                            etiAux = "ETIQUETA" + nroAux2;
+                            mapaEtiAux.put(Integer.parseInt(aux1.substring(1, aux1.length() - 1)), etiAux);  
+                        } 
+                        aux1 = etiAux;                      
+                    }
                     code.append("\tJE " + aux1 + "\n\n");
                     break;
 
-                case "BI":
+                case "BI":  
+                    if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
+                        
+                        etiAux = mapaEtiAux.get(Integer.parseInt(aux1.substring(1, aux1.length() - 1)));
+                        if (etiAux == null) {  
+                            nroAux2++;
+                            etiAux = "ETIQUETA" + nroAux2;
+                            mapaEtiAux.put(Integer.parseInt(aux1.substring(1, aux1.length() - 1)), etiAux);  
+                        } 
+                        aux1 = etiAux;                      
+                    }
                     code.append("\tJMP " + aux1 + "\n\n");
                     break;
 
                 case "ET":
                     nroAux2++;
                     etiAux = "ETIQUETA" + nroAux2;
-                    code.append("\n\t" + etiAux + ":\n\n"); 
+                    code.append("\n" + etiAux + ":\n\n"); 
                     mapaAux.put(index, etiAux);
                     break;
 
