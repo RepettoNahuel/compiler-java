@@ -322,6 +322,10 @@ public class AsmCodeGenerator implements FileGenerator {
                     }
 
                     break;
+                
+                case "POINT":                   
+                    // No genera código ensamblador
+                    break;
 
                 default:
                     code.append("\t[")
