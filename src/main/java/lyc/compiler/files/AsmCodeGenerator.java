@@ -16,10 +16,8 @@ public class AsmCodeGenerator implements FileGenerator {
 
     private String generateHeader() {
         StringBuilder header = new StringBuilder();
-        header.append("include macros.asm\n")
-              .append("include macros2.asm\n")
+        header.append("include macros2.asm\n")
               .append("include number.asm\n")
-              .append("include numbers.asm\n\n")
               .append(".MODEL LARGE\n") //Modelo de Memoria 
               .append(".386\n") //Tipo de Procesador 
               .append(".STACK 200h\n\n") //Bytes en el Stack
@@ -33,6 +31,7 @@ public class AsmCodeGenerator implements FileGenerator {
 
         for (SymbolTableGenerator.Symbol symbol : SymbolTableGenerator.getSymbolTable().values()) {        
             String name = symbol.getName();
+            name = name.replace(" ", "_");
             String type = symbol.getType();
             String value = symbol.getValue();
             int size = symbol.getLength();
@@ -42,6 +41,7 @@ public class AsmCodeGenerator implements FileGenerator {
                     dataSection.append(String.format("\t%s\tdb\tMAXTEXTSIZE dup (?), '$'\n", name));
                 }
                 else{
+                    value = "\"" + value + "\"";   
                     dataSection.append(String.format("\t%s\tdb\t%s, '$', %d dup (?)\n", name, value, 50-size));
                 }
             } else if (type.equals("Float") || type.equals("CTE_FLOAT")) {
