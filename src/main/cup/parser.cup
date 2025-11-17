@@ -117,6 +117,8 @@ start with program;
 program ::= statements 
                     {: 
                         System.out.println("Inicio del análisis");
+                        SymbolTableGenerator.insertVariable("_true", "true", "Boolean");
+                        SymbolTableGenerator.insertVariable("_false", "false", "Boolean");
                     :};
 
 statements ::= /* vacío */ 
@@ -671,7 +673,7 @@ expression ::= expression:left PLUS term:right
 
                         String auxiliarAssig = IntermediateCodeGenerator.getNewTemp();
 
-                        String assignAuxFalse = IntermediateCodeGenerator.addTerceto("ASSIGN", auxiliarAssig, "False");
+                        String assignAuxFalse = IntermediateCodeGenerator.addTerceto("ASSIGN", auxiliarAssig, "false");
                         String saltoFalso = IntermediateCodeGenerator.addTerceto("BI", null, null);
 
                         for (String salto : saltosTrue) {
@@ -679,7 +681,7 @@ expression ::= expression:left PLUS term:right
                             IntermediateCodeGenerator.rellenarSalto(TercetoPendiente, IntermediateCodeGenerator.getNextIndex());
                         }
 
-                        String assignAuxTrue = IntermediateCodeGenerator.addTerceto("ASSIGN", auxiliarAssig, "True");
+                        String assignAuxTrue = IntermediateCodeGenerator.addTerceto("ASSIGN", auxiliarAssig, "true");
 
                         int SaltoPendiente = Integer.parseInt(saltoFalso.replace("[", "").replace("]", ""));
                         IntermediateCodeGenerator.rellenarSalto(SaltoPendiente, IntermediateCodeGenerator.getNextIndex());
@@ -688,7 +690,7 @@ expression ::= expression:left PLUS term:right
 
                         java.util.Set<Double> conjuntoUnico = new java.util.HashSet<>(valoresEvaluados);
                         boolean hayRepetidos = (conjuntoUnico.size() < valoresEvaluados.size());
-                        String resultadoRepetidos = hayRepetidos ? "True" : "False" ;
+                        String resultadoRepetidos = hayRepetidos ? "true" : "false" ;
 
                         System.out.println("[EXPRESSION] equalExpressions : " + auxiliarAssig + " := " + resultadoRepetidos);
 

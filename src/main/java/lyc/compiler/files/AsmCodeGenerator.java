@@ -146,6 +146,16 @@ public class AsmCodeGenerator implements FileGenerator {
                 code.append(nuevaEti + ":\n\n"); 
             } 
 
+            SymbolTableGenerator.Symbol sym1 = SymbolTableGenerator.getSymbol(aux1);
+            if (sym1 == null) {
+                sym1 = SymbolTableGenerator.getSymbol("_" + aux1);
+            }
+
+            SymbolTableGenerator.Symbol sym2 = SymbolTableGenerator.getSymbol(aux2);       
+            if (sym2 == null) {
+                sym2 = SymbolTableGenerator.getSymbol("_" + aux2);
+            }         
+
             switch (op) {
                 case "ADD":       
                     nroAux++;                    
@@ -153,8 +163,36 @@ public class AsmCodeGenerator implements FileGenerator {
                     
                     //code.append("\tMOV R1, " + aux1 + "\n");
                     //code.append("\tADD R1, " + aux2 + "\n");
-                    //code.append("\tMOV " + varAux + ", R1\n\n");      
+                    //code.append("\tMOV " + varAux + ", R1\n\n");    
                     
+                    if (sym1 == null || sym2 == null) {                       
+
+                        if (sym1 == null) {
+                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n\n");
+                        }
+                        if (sym2 == null) { 
+                        code.append("\t; WARNING: " + aux2 + " no está en la tabla de símbolos\n\n");
+                        }   
+
+                        code.append("\t[")
+                        .append(index)
+                        .append("] = (")
+                        .append(op).append(", ")
+                        .append(a1).append(", ")
+                        .append(a2).append(")\n\n");
+
+                        break;
+                    }
+
+                    else {
+                        SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) + Float.parseFloat(sym2.getValue())), "Float");
+
+                        aux1 = sym1.getName().replace(".", "PUNTO");
+                        aux2 = sym2.getName().replace(".", "PUNTO");
+                        aux1 = sym1.getName().replace("-", "SUB");
+                        aux2 = sym2.getName().replace("-", "SUB");
+                    }
+
                     code.append("\tFLD " + aux1 + "\n");
                     code.append("\tFADD " + aux2 + "\n");
                     code.append("\tFSTP " + varAux + "\n\n");
@@ -169,6 +207,34 @@ public class AsmCodeGenerator implements FileGenerator {
                     //code.append("\tMOV R1, " + aux1 + "\n");
                     //code.append("\tSUB R1, " + aux2 + "\n");
                     //code.append("\tMOV " + varAux + ", R1\n\n");   
+
+                    if (sym1 == null || sym2 == null) {                       
+
+                        if (sym1 == null) {
+                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n\n");
+                        }
+                        if (sym2 == null) { 
+                        code.append("\t; WARNING: " + aux2 + " no está en la tabla de símbolos\n\n");
+                        }   
+
+                        code.append("\t[")
+                        .append(index)
+                        .append("] = (")
+                        .append(op).append(", ")
+                        .append(a1).append(", ")
+                        .append(a2).append(")\n\n");
+
+                        break;
+                    }
+
+                    else {
+                        SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) - Float.parseFloat(sym2.getValue())), "Float");
+
+                        aux1 = sym1.getName().replace(".", "PUNTO");
+                        aux2 = sym2.getName().replace(".", "PUNTO");
+                        aux1 = sym1.getName().replace("-", "SUB");
+                        aux2 = sym2.getName().replace("-", "SUB");
+                    }
 
                     code.append("\tFLD " + aux1 + "\n");
                     code.append("\tFSUB " + aux2 + "\n");
@@ -185,6 +251,34 @@ public class AsmCodeGenerator implements FileGenerator {
                     //code.append("\tMUL R1, " + aux2 + "\n");
                     //code.append("\tMOV " + varAux + ", R1\n\n");  
 
+                    if (sym1 == null || sym2 == null) {                       
+
+                        if (sym1 == null) {
+                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n\n");
+                        }
+                        if (sym2 == null) { 
+                        code.append("\t; WARNING: " + aux2 + " no está en la tabla de símbolos\n\n");
+                        }   
+
+                        code.append("\t[")
+                        .append(index)
+                        .append("] = (")
+                        .append(op).append(", ")
+                        .append(a1).append(", ")
+                        .append(a2).append(")\n\n");
+
+                        break;
+                    }
+
+                    else {
+                        SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) * Float.parseFloat(sym2.getValue())), "Float");
+
+                        aux1 = sym1.getName().replace(".", "PUNTO");
+                        aux2 = sym2.getName().replace(".", "PUNTO");
+                        aux1 = sym1.getName().replace("-", "SUB");
+                        aux2 = sym2.getName().replace("-", "SUB");
+                    }
+
                     code.append("\tFLD " + aux1 + "\n");
                     code.append("\tFMUL " + aux2 + "\n");
                     code.append("\tFSTP " + varAux + "\n\n");
@@ -200,6 +294,34 @@ public class AsmCodeGenerator implements FileGenerator {
                     //code.append("\tDIV R1, " + aux2 + "\n");
                     //code.append("\tMOV " + varAux + ", R1\n\n"); 
 
+                    if (sym1 == null || sym2 == null) {                       
+
+                        if (sym1 == null) {
+                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n\n");
+                        }
+                        if (sym2 == null) { 
+                        code.append("\t; WARNING: " + aux2 + " no está en la tabla de símbolos\n\n");
+                        }   
+
+                        code.append("\t[")
+                        .append(index)
+                        .append("] = (")
+                        .append(op).append(", ")
+                        .append(a1).append(", ")
+                        .append(a2).append(")\n\n");
+
+                        break;
+                    }
+
+                    else {
+                        SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) / Float.parseFloat(sym2.getValue())), "Float");
+                        
+                        aux1 = sym1.getName().replace(".", "PUNTO");
+                        aux2 = sym2.getName().replace(".", "PUNTO");
+                        aux1 = sym1.getName().replace("-", "SUB");
+                        aux2 = sym2.getName().replace("-", "SUB");
+                    }
+
                     code.append("\tFLD " + aux1 + "\n");
                     code.append("\tFDIV " + aux2 + "\n");
                     code.append("\tFSTP " + varAux + "\n\n");
@@ -211,10 +333,14 @@ public class AsmCodeGenerator implements FileGenerator {
                     //code.append("\tMOV R1, " + aux2 + "\n");
                     //code.append("\tMOV " + aux1 + ", R1\n\n"); 
 
-                    SymbolTableGenerator.Symbol sym_id = SymbolTableGenerator.getSymbol(aux1);
+                    if (sym1 == null || sym2 == null) {                       
 
-                    if (sym_id == null) {
+                        if (sym1 == null) {
                         code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n\n");
+                        }
+                        if (sym2 == null) { 
+                        code.append("\t; WARNING: " + aux2 + " no está en la tabla de símbolos\n\n");
+                        }   
 
                         code.append("\t[")
                         .append(index)
@@ -226,7 +352,7 @@ public class AsmCodeGenerator implements FileGenerator {
                         break;
                     }
                     else  
-                    if (sym_id.getType().equals("String") || sym_id.getType().equals("CTE_STRING")) {
+                    if (sym1.getType().equals("String") || sym1.getType().equals("CTE_STRING")) {
                         
                         code.append("\tMOV SI, OFFSET " + aux2 + "\n");
                         code.append("\tMOV DI, OFFSET " + aux1 + "\n");
@@ -234,6 +360,11 @@ public class AsmCodeGenerator implements FileGenerator {
 
                     } else { 
 
+                        aux1 = sym1.getName().replace(".", "PUNTO");
+                        aux2 = sym2.getName().replace(".", "PUNTO");
+                        aux1 = sym1.getName().replace("-", "SUB");
+                        aux2 = sym2.getName().replace("-", "SUB");
+                    
                         code.append("\tFLD " + aux2 + "\n");
                         code.append("\tFSTP " + aux1 + "\n\n");
 
@@ -243,6 +374,32 @@ public class AsmCodeGenerator implements FileGenerator {
 
                 case "CMP":
                     //code.append("\tCMP " + aux1 + ", " + aux2 + "\n");      
+                    
+                    if (sym1 == null || sym2 == null) {                       
+
+                        if (sym1 == null) {
+                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n\n");
+                        }
+                        if (sym2 == null) { 
+                        code.append("\t; WARNING: " + aux2 + " no está en la tabla de símbolos\n\n");
+                        }   
+
+                        code.append("\t[")
+                        .append(index)
+                        .append("] = (")
+                        .append(op).append(", ")
+                        .append(a1).append(", ")
+                        .append(a2).append(")\n\n");
+
+                        break;
+                    }
+
+                    else {                        
+                        aux1 = sym1.getName().replace(".", "PUNTO");
+                        aux2 = sym2.getName().replace(".", "PUNTO");
+                        aux1 = sym1.getName().replace("-", "SUB");
+                        aux2 = sym2.getName().replace("-", "SUB");
+                    }
 
                     code.append("\tFLD " + aux1 + "\n");
                     code.append("\tFCOMP " + aux2 + "\n");
