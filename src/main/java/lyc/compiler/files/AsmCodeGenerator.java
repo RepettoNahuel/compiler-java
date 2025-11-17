@@ -475,7 +475,8 @@ public class AsmCodeGenerator implements FileGenerator {
                             aux1 = aux1.replace("[", "CORA");
                             aux1 = aux1.replace("]", "CORC"); 
 
-                            code.append("\tDisplayString " + aux1 + "\n\n");  
+                            code.append("\tDisplayString " + aux1 + "\n");  
+                            code.append("\tnewLine 1 \n\n");                      
                             break;
                         
                         case "Integer":
@@ -483,7 +484,8 @@ public class AsmCodeGenerator implements FileGenerator {
                             aux1 = sym1.getName().replace(".", "PUNTO");                        
                             aux1 = aux1.replace("-", "SUB");
                         
-                            code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                            code.append("\tDisplayInteger " + aux1 + "\n");  
+                            code.append("\tnewLine 1 \n\n");                      
                             break;
 
                         case "Float":
@@ -491,10 +493,11 @@ public class AsmCodeGenerator implements FileGenerator {
                             aux1 = sym1.getName().replace(".", "PUNTO");                        
                             aux1 = aux1.replace("-", "SUB");
 
-                            code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                            code.append("\tDisplayFloat " + aux1 + "\n"); 
+                            code.append("\tnewLine 1 \n\n");                    
                             break;
                     }
-
+                    
                     break;
 
                 case "READ":
