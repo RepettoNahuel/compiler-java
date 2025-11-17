@@ -418,6 +418,44 @@ public class AsmCodeGenerator implements FileGenerator {
                     mapaAux.put(index, etiAux);
                     break;    
 
+                case "WRITE":
+                    SymbolTableGenerator.Symbol sym_aux = SymbolTableGenerator.getSymbol(aux1);
+                   
+                    if (sym_aux == null) {
+                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n");
+                        break;
+                    }
+
+                    switch (sym_aux.getType()) {
+                        case "String" -> code.append("\tDisplayString " + aux1 + "\n\n"); 
+                        case "CTE_STRING" -> code.append("\tDisplayString " + aux1 + "\n\n");  
+                        case "Integer" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                        case "CTE_INTEGER" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                        case "Float" -> code.append("\tDisplayFloat " + aux1 + "\n\n"); 
+                        case "CTE_FLOAT" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                    }
+
+                    break;
+
+                case "READ":
+                    SymbolTableGenerator.Symbol sym_aux2 = SymbolTableGenerator.getSymbol(aux1);
+                   
+                    if (sym_aux2 == null) {
+                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n");
+                        break;
+                    }
+
+                    switch (sym_aux2.getType()) {
+                        case "String" -> code.append("\tGetString " + aux1 + "\n\n"); 
+                        case "CTE_STRING" -> code.append("\tGetString " + aux1 + "\n\n");  
+                        case "Integer" -> code.append("\tGetFloat " + aux1 + "\n\n");  
+                        case "CTE_INTEGER" -> code.append("\tGetFloat " + aux1 + "\n\n");  
+                        case "Float" -> code.append("\tGetFloat " + aux1 + "\n\n"); 
+                        case "CTE_FLOAT" -> code.append("\tGetFloat " + aux1 + "\n\n");  
+                    }
+
+                    break;     
+                
                 //arreglar de aca para abajo >:(    
                 case "BGE":
                     if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
@@ -515,45 +553,7 @@ public class AsmCodeGenerator implements FileGenerator {
                         aux1 = etiAux;                      
                     }
                     code.append("\tJMP " + aux1 + "\n\n");
-                    break;                
-
-                case "WRITE":
-                    SymbolTableGenerator.Symbol sym_aux = SymbolTableGenerator.getSymbol(aux1);
-                   
-                    if (sym_aux == null) {
-                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n");
-                        break;
-                    }
-
-                    switch (sym_aux.getType()) {
-                        case "String" -> code.append("\tDisplayString " + aux1 + "\n\n"); 
-                        case "CTE_STRING" -> code.append("\tDisplayString " + aux1 + "\n\n");  
-                        case "Integer" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
-                        case "CTE_INTEGER" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
-                        case "Float" -> code.append("\tDisplayFloat " + aux1 + "\n\n"); 
-                        case "CTE_FLOAT" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
-                    }
-
-                    break;
-
-                case "READ":
-                    SymbolTableGenerator.Symbol sym_aux2 = SymbolTableGenerator.getSymbol(aux1);
-                   
-                    if (sym_aux2 == null) {
-                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n");
-                        break;
-                    }
-
-                    switch (sym_aux2.getType()) {
-                        case "String" -> code.append("\tGetString " + aux1 + "\n\n"); 
-                        case "CTE_STRING" -> code.append("\tGetString " + aux1 + "\n\n");  
-                        case "Integer" -> code.append("\tGetFloat " + aux1 + "\n\n");  
-                        case "CTE_INTEGER" -> code.append("\tGetFloat " + aux1 + "\n\n");  
-                        case "Float" -> code.append("\tGetFloat " + aux1 + "\n\n"); 
-                        case "CTE_FLOAT" -> code.append("\tGetFloat " + aux1 + "\n\n");  
-                    }
-
-                    break;              
+                    break;                  
 
                 default:
                     code.append("\t[")
