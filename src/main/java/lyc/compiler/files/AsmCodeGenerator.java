@@ -32,6 +32,19 @@ public class AsmCodeGenerator implements FileGenerator {
         for (SymbolTableGenerator.Symbol symbol : SymbolTableGenerator.getSymbolTable().values()) {        
             String name = symbol.getName();
             name = name.replace(" ", "_");
+            name = name.replace(".", "PUNTO");
+            name = name.replace("<", "MENOR");
+            name = name.replace(">", "MAYOR");
+            name = name.replace("-", "SUB");
+            name = name.replace("+", "ADD");
+            name = name.replace("/", "DIV");
+            name = name.replace("*", "MULT");
+            name = name.replace("=", "IGUAL");
+            name = name.replace("(", "PARA");
+            name = name.replace(")", "PARC");
+            name = name.replace("[", "CORA");
+            name = name.replace("]", "CORC");
+
             String type = symbol.getType();
             String value = symbol.getValue();
             int size = symbol.getLength();
