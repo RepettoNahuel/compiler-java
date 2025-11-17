@@ -189,8 +189,8 @@ public class AsmCodeGenerator implements FileGenerator {
 
                         aux1 = sym1.getName().replace(".", "PUNTO");
                         aux2 = sym2.getName().replace(".", "PUNTO");
-                        aux1 = sym1.getName().replace("-", "SUB");
-                        aux2 = sym2.getName().replace("-", "SUB");
+                        aux1 = aux1.replace("-", "SUB");
+                        aux2 = aux2.replace("-", "SUB");
                     }
 
                     code.append("\tFLD " + aux1 + "\n");
@@ -232,8 +232,8 @@ public class AsmCodeGenerator implements FileGenerator {
 
                         aux1 = sym1.getName().replace(".", "PUNTO");
                         aux2 = sym2.getName().replace(".", "PUNTO");
-                        aux1 = sym1.getName().replace("-", "SUB");
-                        aux2 = sym2.getName().replace("-", "SUB");
+                        aux1 = aux1.replace("-", "SUB");
+                        aux2 = aux2.replace("-", "SUB");
                     }
 
                     code.append("\tFLD " + aux1 + "\n");
@@ -275,8 +275,8 @@ public class AsmCodeGenerator implements FileGenerator {
 
                         aux1 = sym1.getName().replace(".", "PUNTO");
                         aux2 = sym2.getName().replace(".", "PUNTO");
-                        aux1 = sym1.getName().replace("-", "SUB");
-                        aux2 = sym2.getName().replace("-", "SUB");
+                        aux1 = aux1.replace("-", "SUB");
+                        aux2 = aux2.replace("-", "SUB");
                     }
 
                     code.append("\tFLD " + aux1 + "\n");
@@ -318,8 +318,8 @@ public class AsmCodeGenerator implements FileGenerator {
                         
                         aux1 = sym1.getName().replace(".", "PUNTO");
                         aux2 = sym2.getName().replace(".", "PUNTO");
-                        aux1 = sym1.getName().replace("-", "SUB");
-                        aux2 = sym2.getName().replace("-", "SUB");
+                        aux1 = aux1.replace("-", "SUB");
+                        aux2 = aux2.replace("-", "SUB");
                     }
 
                     code.append("\tFLD " + aux1 + "\n");
@@ -362,8 +362,8 @@ public class AsmCodeGenerator implements FileGenerator {
 
                         aux1 = sym1.getName().replace(".", "PUNTO");
                         aux2 = sym2.getName().replace(".", "PUNTO");
-                        aux1 = sym1.getName().replace("-", "SUB");
-                        aux2 = sym2.getName().replace("-", "SUB");
+                        aux1 = aux1.replace("-", "SUB");
+                        aux2 = aux2.replace("-", "SUB");
                     
                         code.append("\tFLD " + aux2 + "\n");
                         code.append("\tFSTP " + aux1 + "\n\n");
@@ -397,8 +397,8 @@ public class AsmCodeGenerator implements FileGenerator {
                     else {                        
                         aux1 = sym1.getName().replace(".", "PUNTO");
                         aux2 = sym2.getName().replace(".", "PUNTO");
-                        aux1 = sym1.getName().replace("-", "SUB");
-                        aux2 = sym2.getName().replace("-", "SUB");
+                        aux1 = aux1.replace("-", "SUB");
+                        aux2 = aux2.replace("-", "SUB");
                     }
 
                     code.append("\tFLD " + aux1 + "\n");
