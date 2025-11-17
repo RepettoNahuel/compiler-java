@@ -71,9 +71,9 @@ public class AsmCodeGenerator implements FileGenerator {
                 }
             } else if (type.equals("Boolean") || type.equals("CTE_BOOLEAN")) {
                 if (value != null && !value.equals("")) {
-                    dataSection.append(String.format("\t%s\tdb\t%s\n", name, value.equals("True") ? 1 : 0));
+                    dataSection.append(String.format("\t%s\tdd\t%s\n", name, value.equals("true") ? 1 : 0));
                 } else {
-                    dataSection.append(String.format("\t%s\tdb\t?\n", name));
+                    dataSection.append(String.format("\t%s\tdd\t?\n", name));
                 }
             }
         }
