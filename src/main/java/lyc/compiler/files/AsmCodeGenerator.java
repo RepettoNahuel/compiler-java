@@ -151,46 +151,78 @@ public class AsmCodeGenerator implements FileGenerator {
                 case "ADD":       
                     nroAux++;                    
                     varAux = "@aux" + nroAux;        
-                    code.append("\tMOV R1, " + aux1 + "\n");
-                    code.append("\tADD R1, " + aux2 + "\n");
-                    code.append("\tMOV " + varAux + ", R1\n\n");       
+                    
+                    //code.append("\tMOV R1, " + aux1 + "\n");
+                    //code.append("\tADD R1, " + aux2 + "\n");
+                    //code.append("\tMOV " + varAux + ", R1\n\n");      
+                    
+                    code.append("\tFLD " + aux1 + "\n");
+                    code.append("\tFADD " + aux2 + "\n");
+                    code.append("\tFSTP " + varAux + "\n\n");
+
                     mapaAux.put(index, varAux);           
                     break;
 
                 case "SUB":
                     nroAux++;                    
-                    varAux = "@aux" + nroAux;        
-                    code.append("\tMOV R1, " + aux1 + "\n");
-                    code.append("\tSUB R1, " + aux2 + "\n");
-                    code.append("\tMOV " + varAux + ", R1\n\n");    
+                    varAux = "@aux" + nroAux;  
+
+                    //code.append("\tMOV R1, " + aux1 + "\n");
+                    //code.append("\tSUB R1, " + aux2 + "\n");
+                    //code.append("\tMOV " + varAux + ", R1\n\n");   
+
+                    code.append("\tFLD " + aux1 + "\n");
+                    code.append("\tFSUB " + aux2 + "\n");
+                    code.append("\tFSTP " + varAux + "\n\n");
+
                     mapaAux.put(index, varAux);               
                     break;
 
                 case "MULT":
                     nroAux++;                    
-                    varAux = "@aux" + nroAux;        
-                    code.append("\tMOV R1, " + aux1 + "\n");
-                    code.append("\tMUL R1, " + aux2 + "\n");
-                    code.append("\tMOV " + varAux + ", R1\n\n");  
+                    varAux = "@aux" + nroAux;      
+
+                    //code.append("\tMOV R1, " + aux1 + "\n");
+                    //code.append("\tMUL R1, " + aux2 + "\n");
+                    //code.append("\tMOV " + varAux + ", R1\n\n");  
+
+                    code.append("\tFLD " + aux1 + "\n");
+                    code.append("\tFMUL " + aux2 + "\n");
+                    code.append("\tFSTP " + varAux + "\n\n");
+
                     mapaAux.put(index, varAux);                 
                     break;
 
                 case "DIV":
                     nroAux++;                    
-                    varAux = "@aux" + nroAux;        
-                    code.append("\tMOV R1, " + aux1 + "\n");
-                    code.append("\tDIV R1, " + aux2 + "\n");
-                    code.append("\tMOV " + varAux + ", R1\n\n");  
+                    varAux = "@aux" + nroAux;    
+
+                    //code.append("\tMOV R1, " + aux1 + "\n");
+                    //code.append("\tDIV R1, " + aux2 + "\n");
+                    //code.append("\tMOV " + varAux + ", R1\n\n"); 
+
+                    code.append("\tFLD " + aux1 + "\n");
+                    code.append("\tFDIV " + aux2 + "\n");
+                    code.append("\tFSTP " + varAux + "\n\n");
+
                     mapaAux.put(index, varAux);                 
                     break;
 
                 case "ASSIGN":    
-                    code.append("\tMOV R1, " + aux2 + "\n");
-                    code.append("\tMOV " + aux1 + ", R1\n\n"); 
+                    //code.append("\tMOV R1, " + aux2 + "\n");
+                    //code.append("\tMOV " + aux1 + ", R1\n\n"); 
+
+                    code.append("\tFLD " + aux2 + "\n");
+                    code.append("\tFSTP " + aux1 + "\n\n");
                     break;
 
                 case "CMP":
-                    code.append("\tCMP " + aux1 + ", " + aux2 + "\n");      
+                    //code.append("\tCMP " + aux1 + ", " + aux2 + "\n");      
+
+                    code.append("\tFLD " + aux1 + "\n");
+                    code.append("\tFCOMP " + aux2 + "\n");
+                    code.append("\tFSTSW AX\n");
+                    code.append("\tSAHF\n\n");
                     break;
 
                 case "BGE":
