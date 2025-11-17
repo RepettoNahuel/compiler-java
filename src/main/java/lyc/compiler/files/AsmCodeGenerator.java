@@ -17,6 +17,7 @@ public class AsmCodeGenerator implements FileGenerator {
     private String generateHeader() {
         StringBuilder header = new StringBuilder();
         header.append("include macros2.asm\n")
+              .append("include macros.asm\n")
               .append("include number.asm\n")
               .append(".MODEL LARGE\n") //Modelo de Memoria 
               .append(".386\n") //Tipo de Procesador 
@@ -65,7 +66,7 @@ public class AsmCodeGenerator implements FileGenerator {
                 }
             } else if (type.equals("Integer") || type.equals("CTE_INTEGER")) {
                 if (value != null && !value.equals("")) {
-                    dataSection.append(String.format("\t%s\tdd\t%s\n", name, value));
+                    dataSection.append(String.format("\t%s\tdd\t%s.0\n", name, value));
                 } else {
                     dataSection.append(String.format("\t%s\tdd\t?\n", name));
                 }
@@ -429,11 +430,13 @@ public class AsmCodeGenerator implements FileGenerator {
                         aux2 = aux2.replace("-", "SUB");
                     }
 
-                    code.append("\tFLD " + aux1 + "\n");
-                    code.append("\tFCOMP " + aux2 + "\n");
-                    code.append("\tFSTSW AX\n");
-                    code.append("\tSAHF\n\n");
-                    break;
+                        code.append("\tFLD " + aux1 + "\n");
+                        code.append("\tFLD " + aux2 + "\n");
+                        code.append("\tFXCH\n");
+                        code.append("\tFCOMPP\n");
+                        code.append("\tFSTSW AX\n");
+                        code.append("\tSAHF\n\n");
+                        break;
 
                 case "POINT":                   
                     // No genera código ensamblador
