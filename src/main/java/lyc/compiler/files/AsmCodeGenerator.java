@@ -250,6 +250,18 @@ public class AsmCodeGenerator implements FileGenerator {
                     code.append("\tSAHF\n\n");
                     break;
 
+                case "POINT":                   
+                    // No genera código ensamblador
+                    break;   
+                    
+                case "ET":
+                    nroAux2++;
+                    etiAux = "ETIQUETA" + nroAux2;
+                    code.append("\n" + etiAux + ":\n\n"); 
+                    mapaAux.put(index, etiAux);
+                    break;    
+
+                //arreglar de aca para abajo >:(    
                 case "BGE":
                     if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
                         
@@ -346,14 +358,7 @@ public class AsmCodeGenerator implements FileGenerator {
                         aux1 = etiAux;                      
                     }
                     code.append("\tJMP " + aux1 + "\n\n");
-                    break;
-
-                case "ET":
-                    nroAux2++;
-                    etiAux = "ETIQUETA" + nroAux2;
-                    code.append("\n" + etiAux + ":\n\n"); 
-                    mapaAux.put(index, etiAux);
-                    break;
+                    break;                
 
                 case "WRITE":
                     SymbolTableGenerator.Symbol sym_aux = SymbolTableGenerator.getSymbol(aux1);
@@ -391,11 +396,7 @@ public class AsmCodeGenerator implements FileGenerator {
                         case "CTE_FLOAT" -> code.append("\tGetFloat " + aux1 + "\n\n");  
                     }
 
-                    break;
-                
-                case "POINT":                   
-                    // No genera código ensamblador
-                    break;
+                    break;              
 
                 default:
                     code.append("\t[")
