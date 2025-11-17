@@ -185,7 +185,7 @@ public class AsmCodeGenerator implements FileGenerator {
                     }
 
                     else {
-                        SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) + Float.parseFloat(sym2.getValue())), "Float");
+                        //SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) + Float.parseFloat(sym2.getValue())), "Float");
 
                         aux1 = sym1.getName().replace(".", "PUNTO");
                         aux2 = sym2.getName().replace(".", "PUNTO");
@@ -228,7 +228,7 @@ public class AsmCodeGenerator implements FileGenerator {
                     }
 
                     else {
-                        SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) - Float.parseFloat(sym2.getValue())), "Float");
+                        //SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) - Float.parseFloat(sym2.getValue())), "Float");
 
                         aux1 = sym1.getName().replace(".", "PUNTO");
                         aux2 = sym2.getName().replace(".", "PUNTO");
@@ -271,7 +271,7 @@ public class AsmCodeGenerator implements FileGenerator {
                     }
 
                     else {
-                        SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) * Float.parseFloat(sym2.getValue())), "Float");
+                        //SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) * Float.parseFloat(sym2.getValue())), "Float");
 
                         aux1 = sym1.getName().replace(".", "PUNTO");
                         aux2 = sym2.getName().replace(".", "PUNTO");
@@ -314,7 +314,7 @@ public class AsmCodeGenerator implements FileGenerator {
                     }
 
                     else {
-                        SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) / Float.parseFloat(sym2.getValue())), "Float");
+                        //SymbolTableGenerator.insertVariable(varAux, String.valueOf(Float.parseFloat(sym1.getValue()) / Float.parseFloat(sym2.getValue())), "Float");
                         
                         aux1 = sym1.getName().replace(".", "PUNTO");
                         aux2 = sym2.getName().replace(".", "PUNTO");

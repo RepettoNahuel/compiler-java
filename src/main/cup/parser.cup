@@ -16,6 +16,9 @@ parser code {:
         if ("Float".equals(a) || "Float".equals(b)) return "Float";
         return "Integer";
     }
+
+    int nroAux = 0;
+    String varAux;
 :}
 
 /*** Elementos Terminales ***/
@@ -271,6 +274,10 @@ expression ::= expression:left PLUS term:right
                         String resultType = promoteNumericType(typeL, typeR);
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("ADD", l.get("value"), r.get("value"));
+                        
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
 
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", terceto);
@@ -294,6 +301,10 @@ expression ::= expression:left PLUS term:right
                         String resultType = promoteNumericType(typeL, typeR);
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("SUB", l.get("value"), r.get("value"));
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
 
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", terceto);
@@ -333,7 +344,11 @@ expression ::= expression:left PLUS term:right
                         IntermediateCodeGenerator.DetalleTerceto pp12 = IntermediateCodeGenerator.getTerceto(point12.get("value").toString());
                         IntermediateCodeGenerator.DetalleTerceto pp13 = IntermediateCodeGenerator.getTerceto(point13.get("value").toString());
 
-                        Object temp_tr1 = IntermediateCodeGenerator.addTerceto("SUB", pp12.arg2, pp13.arg2);                        
+                        Object temp_tr1 = IntermediateCodeGenerator.addTerceto("SUB", pp12.arg2, pp13.arg2);           
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");            
 
                         SymbolTableGenerator.Symbol sym_aux = SymbolTableGenerator.getSymbol(pp12.arg2);
                             
@@ -357,6 +372,10 @@ expression ::= expression:left PLUS term:right
 
                         Object temp_tr2 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr1, pp11.arg1);
 
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
                         sym_aux = SymbolTableGenerator.getSymbol(pp11.arg1);
                             
                         if (sym_aux != null) {
@@ -369,6 +388,10 @@ expression ::= expression:left PLUS term:right
                         areaAux = areaAux * valor1;
 
                         Object temp_tr3 = IntermediateCodeGenerator.addTerceto("SUB", pp13.arg2, pp11.arg2);
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
 
                         sym_aux = SymbolTableGenerator.getSymbol(pp13.arg2);
                             
@@ -392,6 +415,10 @@ expression ::= expression:left PLUS term:right
 
                         Object temp_tr4 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr3, pp12.arg1);
 
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
                         sym_aux = SymbolTableGenerator.getSymbol(pp12.arg1);
                             
                         if (sym_aux != null) {
@@ -405,9 +432,17 @@ expression ::= expression:left PLUS term:right
 
                         Object temp_tr5 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr2, temp_tr4);
 
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
                         areaAux = areaAux + intermedio;
 
                         Object temp_tr6 = IntermediateCodeGenerator.addTerceto("SUB", pp11.arg2, pp12.arg2);
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
 
                         sym_aux = SymbolTableGenerator.getSymbol(pp11.arg2);
                             
@@ -431,6 +466,10 @@ expression ::= expression:left PLUS term:right
 
                         Object temp_tr7 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr6, pp13.arg1);
 
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
                         sym_aux = SymbolTableGenerator.getSymbol(pp13.arg1);
                             
                         if (sym_aux != null) {
@@ -444,9 +483,17 @@ expression ::= expression:left PLUS term:right
 
                         Object temp_tr8 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr5, temp_tr7);
 
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
                         areaAux = areaAux + intermedio;
 
                         Object temp_tr9 = IntermediateCodeGenerator.addTerceto("DIV", temp_tr8, "2");
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
 
                         areaAux = Math.abs(areaAux) / 2;
                         maximo = areaAux;
@@ -465,6 +512,10 @@ expression ::= expression:left PLUS term:right
                         IntermediateCodeGenerator.DetalleTerceto pp23 = IntermediateCodeGenerator.getTerceto(point23.get("value").toString());
 
                         Object temp_tr21 = IntermediateCodeGenerator.addTerceto("SUB", pp22.arg2, pp23.arg2);
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
 
                         sym_aux = SymbolTableGenerator.getSymbol(pp22.arg2);
                             
@@ -488,6 +539,10 @@ expression ::= expression:left PLUS term:right
 
                         Object temp_tr22 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr21, pp21.arg1);
 
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
                         sym_aux = SymbolTableGenerator.getSymbol(pp21.arg1);
                             
                         if (sym_aux != null) {
@@ -500,6 +555,10 @@ expression ::= expression:left PLUS term:right
                         areaAux = areaAux * valor1;
 
                         Object temp_tr23 = IntermediateCodeGenerator.addTerceto("SUB", pp23.arg2, pp21.arg2);
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
 
                         sym_aux = SymbolTableGenerator.getSymbol(pp23.arg2);
                             
@@ -522,6 +581,10 @@ expression ::= expression:left PLUS term:right
                         intermedio = valor1 - valor2;
 
                         Object temp_tr24 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr23, pp22.arg1);
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
                         
                         sym_aux = SymbolTableGenerator.getSymbol(pp22.arg1);
                             
@@ -536,9 +599,21 @@ expression ::= expression:left PLUS term:right
 
                         Object temp_tr25 = IntermediateCodeGenerator.addTerceto("ADD", temp_tr22, temp_tr24);
 
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
                         areaAux = areaAux + intermedio;
 
                         Object temp_tr26 = IntermediateCodeGenerator.addTerceto("SUB", pp21.arg2, pp22.arg2);
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
 
                         sym_aux = SymbolTableGenerator.getSymbol(pp21.arg2);
                             
@@ -562,6 +637,10 @@ expression ::= expression:left PLUS term:right
 
                         Object temp_tr27 = IntermediateCodeGenerator.addTerceto("MULT", temp_tr26, pp23.arg1);
 
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
                         sym_aux = SymbolTableGenerator.getSymbol(pp23.arg1);
                             
                         if (sym_aux != null) {
@@ -578,6 +657,10 @@ expression ::= expression:left PLUS term:right
                         areaAux = areaAux + intermedio;
 
                         Object temp_tr29 = IntermediateCodeGenerator.addTerceto("DIV", temp_tr28, "2");
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
 
                         areaAux = Math.abs(areaAux) / 2;
 
@@ -791,6 +874,10 @@ term ::= term:left MULT factor:right
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("MULT", l.get("value"), r.get("value"));
 
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", terceto);
                         result.put("type", resultType);
@@ -813,6 +900,10 @@ term ::= term:left MULT factor:right
                         String resultType = promoteNumericType(typeL, typeR);
 
                         Object terceto = IntermediateCodeGenerator.addTerceto("DIV", l.get("value"), r.get("value"));
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
 
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", terceto);
