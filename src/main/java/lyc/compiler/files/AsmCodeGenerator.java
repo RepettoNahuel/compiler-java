@@ -353,6 +353,34 @@ public class AsmCodeGenerator implements FileGenerator {
                     }
                     else  
                     if (sym1.getType().equals("String") || sym1.getType().equals("CTE_STRING")) {
+
+                        aux2 = aux2.replace(" ", "_");
+                        aux2 = aux2.replace(".", "PUNTO");
+                        aux2 = aux2.replace("<", "MENOR");
+                        aux2 = aux2.replace(">", "MAYOR");
+                        aux2 = aux2.replace("-", "SUB");
+                        aux2 = aux2.replace("+", "ADD");
+                        aux2 = aux2.replace("/", "DIV");
+                        aux2 = aux2.replace("*", "MULT");
+                        aux2 = aux2.replace("=", "IGUAL");
+                        aux2 = aux2.replace("(", "PARA");
+                        aux2 = aux2.replace(")", "PARC");
+                        aux2 = aux2.replace("[", "CORA");
+                        aux2 = aux2.replace("]", "CORC");   
+                        
+                        aux1 = aux1.replace(" ", "_");
+                        aux1 = aux1.replace(".", "PUNTO");
+                        aux1 = aux1.replace("<", "MENOR");
+                        aux1 = aux1.replace(">", "MAYOR");
+                        aux1 = aux1.replace("-", "SUB");
+                        aux1 = aux1.replace("+", "ADD");
+                        aux1 = aux1.replace("/", "DIV");
+                        aux1 = aux1.replace("*", "MULT");
+                        aux1 = aux1.replace("=", "IGUAL");
+                        aux1 = aux1.replace("(", "PARA");
+                        aux1 = aux1.replace(")", "PARC");
+                        aux1 = aux1.replace("[", "CORA");
+                        aux1 = aux1.replace("]", "CORC"); 
                         
                         code.append("\tMOV SI, OFFSET " + aux2 + "\n");
                         code.append("\tMOV DI, OFFSET " + aux1 + "\n");
