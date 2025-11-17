@@ -692,6 +692,8 @@ expression ::= expression:left PLUS term:right
 
                         System.out.println("[EXPRESSION] equalExpressions : " + auxiliarAssig + " := " + resultadoRepetidos);
 
+                        SymbolTableGenerator.insertVariable(auxiliarAssig, resultadoRepetidos, "Boolean");
+
                         Map<String, Object> result = new HashMap<>();
                         result.put("value", auxiliarAssig);
                         result.put("type", "Boolean");

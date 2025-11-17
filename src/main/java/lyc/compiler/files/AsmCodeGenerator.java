@@ -96,7 +96,6 @@ public class AsmCodeGenerator implements FileGenerator {
         int key;
         String value;
         String nuevaEti;
-
                  
         code.append(".CODE\n\n")
             .append("START:\n")
@@ -212,8 +211,34 @@ public class AsmCodeGenerator implements FileGenerator {
                     //code.append("\tMOV R1, " + aux2 + "\n");
                     //code.append("\tMOV " + aux1 + ", R1\n\n"); 
 
-                    code.append("\tFLD " + aux2 + "\n");
-                    code.append("\tFSTP " + aux1 + "\n\n");
+                    SymbolTableGenerator.Symbol sym_id = SymbolTableGenerator.getSymbol(aux1);
+
+                    if (sym_id == null) {
+                        code.append("\t; WARNING: " + aux1 + " no está en la tabla de símbolos\n\n");
+
+                        code.append("\t[")
+                        .append(index)
+                        .append("] = (")
+                        .append(op).append(", ")
+                        .append(a1).append(", ")
+                        .append(a2).append(")\n\n");
+
+                        break;
+                    }
+                    else  
+                    if (sym_id.getType().equals("String") || sym_id.getType().equals("CTE_STRING")) {
+                        
+                        code.append("\tMOV SI, OFFSET " + aux2 + "\n");
+                        code.append("\tMOV DI, OFFSET " + aux1 + "\n");
+                        code.append("\tSTRCPY\n\n");
+
+                    } else { 
+
+                        code.append("\tFLD " + aux2 + "\n");
+                        code.append("\tFSTP " + aux1 + "\n\n");
+
+                    }
+
                     break;
 
                 case "CMP":
