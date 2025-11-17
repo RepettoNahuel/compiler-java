@@ -454,13 +454,31 @@ public class AsmCodeGenerator implements FileGenerator {
                         break;
                     }
 
+                    ///castear las cosas igual que en el asign!!!!
                     switch (sym_aux.getType()) {
-                        case "String" -> code.append("\tDisplayString " + aux1 + "\n\n"); 
-                        case "CTE_STRING" -> code.append("\tDisplayString " + aux1 + "\n\n");  
-                        case "Integer" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
-                        case "CTE_INTEGER" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
-                        case "Float" -> code.append("\tDisplayFloat " + aux1 + "\n\n"); 
-                        case "CTE_FLOAT" -> code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                        case "String":
+                            code.append("\tDisplayString " + aux1 + "\n\n"); 
+                            break;
+
+                        case "CTE_STRING":
+                            code.append("\tDisplayString " + aux1 + "\n\n");  
+                            break;
+                        
+                        case "Integer":
+                            code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                            break;
+
+                        case "CTE_INTEGER":
+                            code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                            break;
+
+                        case "Float":
+                            code.append("\tDisplayFloat " + aux1 + "\n\n"); 
+                            break;
+
+                        case "CTE_FLOAT":
+                            code.append("\tDisplayFloat " + aux1 + "\n\n");  
+                            break;
                     }
 
                     break;
