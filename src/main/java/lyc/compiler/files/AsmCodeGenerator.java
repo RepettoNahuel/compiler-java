@@ -457,26 +457,37 @@ public class AsmCodeGenerator implements FileGenerator {
                     ///castear las cosas igual que en el asign!!!!
                     switch (sym_aux.getType()) {
                         case "String":
-                            code.append("\tDisplayString " + aux1 + "\n\n"); 
-                            break;
-
                         case "CTE_STRING":
+                            aux1 = aux1.replace(" ", "_");
+                            aux1 = aux1.replace(".", "PUNTO");
+                            aux1 = aux1.replace("<", "MENOR");
+                            aux1 = aux1.replace(">", "MAYOR");
+                            aux1 = aux1.replace("-", "SUB");
+                            aux1 = aux1.replace("+", "ADD");
+                            aux1 = aux1.replace("/", "DIV");
+                            aux1 = aux1.replace("*", "MULT");
+                            aux1 = aux1.replace("=", "IGUAL");
+                            aux1 = aux1.replace("(", "PARA");
+                            aux1 = aux1.replace(")", "PARC");
+                            aux1 = aux1.replace("[", "CORA");
+                            aux1 = aux1.replace("]", "CORC"); 
+
                             code.append("\tDisplayString " + aux1 + "\n\n");  
                             break;
                         
                         case "Integer":
-                            code.append("\tDisplayFloat " + aux1 + "\n\n");  
-                            break;
-
                         case "CTE_INTEGER":
+                            aux1 = sym1.getName().replace(".", "PUNTO");                        
+                            aux1 = aux1.replace("-", "SUB");
+                        
                             code.append("\tDisplayFloat " + aux1 + "\n\n");  
                             break;
 
                         case "Float":
-                            code.append("\tDisplayFloat " + aux1 + "\n\n"); 
-                            break;
-
                         case "CTE_FLOAT":
+                            aux1 = sym1.getName().replace(".", "PUNTO");                        
+                            aux1 = aux1.replace("-", "SUB");
+
                             code.append("\tDisplayFloat " + aux1 + "\n\n");  
                             break;
                     }
@@ -492,17 +503,44 @@ public class AsmCodeGenerator implements FileGenerator {
                     }
 
                     switch (sym_aux2.getType()) {
-                        case "String" -> code.append("\tGetString " + aux1 + "\n\n"); 
-                        case "CTE_STRING" -> code.append("\tGetString " + aux1 + "\n\n");  
-                        case "Integer" -> code.append("\tGetFloat " + aux1 + "\n\n");  
-                        case "CTE_INTEGER" -> code.append("\tGetFloat " + aux1 + "\n\n");  
-                        case "Float" -> code.append("\tGetFloat " + aux1 + "\n\n"); 
-                        case "CTE_FLOAT" -> code.append("\tGetFloat " + aux1 + "\n\n");  
+                        case "String": 
+                        case "CTE_STRING": 
+                            aux1 = aux1.replace(" ", "_");
+                            aux1 = aux1.replace(".", "PUNTO");
+                            aux1 = aux1.replace("<", "MENOR");
+                            aux1 = aux1.replace(">", "MAYOR");
+                            aux1 = aux1.replace("-", "SUB");
+                            aux1 = aux1.replace("+", "ADD");
+                            aux1 = aux1.replace("/", "DIV");
+                            aux1 = aux1.replace("*", "MULT");
+                            aux1 = aux1.replace("=", "IGUAL");
+                            aux1 = aux1.replace("(", "PARA");
+                            aux1 = aux1.replace(")", "PARC");
+                            aux1 = aux1.replace("[", "CORA");
+                            aux1 = aux1.replace("]", "CORC"); 
+
+                            code.append("\tGetString " + aux1 + "\n\n");  
+                            break;
+
+                        case "Integer": 
+                        case "CTE_INTEGER": 
+                            aux1 = sym1.getName().replace(".", "PUNTO");                        
+                            aux1 = aux1.replace("-", "SUB");
+
+                            code.append("\tGetFloat " + aux1 + "\n\n");  
+                            break;
+
+                        case "Float": 
+                        case "CTE_FLOAT": 
+                            aux1 = sym1.getName().replace(".", "PUNTO");                        
+                            aux1 = aux1.replace("-", "SUB");
+
+                            code.append("\tGetFloat " + aux1 + "\n\n");  
+                            break;
                     }
 
                     break;     
-                
-                //arreglar de aca para abajo >:(    
+ 
                 case "BGE":
                     if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
                         
