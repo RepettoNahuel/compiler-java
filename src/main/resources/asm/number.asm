@@ -52,6 +52,19 @@ endm
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   
   
- 
+DisplayInteger2 MACRO number
+
+    mov eax, number
+    mov @tempFloat, eax
+
+    fld @tempFloat
+    fistp @tempInt
+
+    lea bx, @tempInt
+    call itoa
+
+ENDM
+;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   
   
   
