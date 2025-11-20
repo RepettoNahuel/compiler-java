@@ -86,6 +86,16 @@ else
     write("a es mas chico o igual a b")
 }
 
+b := 5
+a := 9.9
+
+write(b)
+write(a)
+if (b < a)
+{
+    write ("b es menor que a")
+}
+
 
 a := 5.5
 b := 1 
@@ -108,5 +118,7 @@ EqualFalse := equalExpressions(0, -5, a + b)
 nn := 2
 nnn := 3.8
 areaMax := triangleAreaMaximum( [0,nnn; 4.0,12; 2.5,3] ; [nnn,0; 6,0; nn,2] )
+
+write(areaMax)
 
 #+ Esto es un comentario +#

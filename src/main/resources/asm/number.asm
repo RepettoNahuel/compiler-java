@@ -31,7 +31,7 @@ endm
 
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-DisplayFloat              macro  Number, places
+DisplayFloat              macro  number, places
 ;displays a floating point double word sized variable on the screen 
 
                 lea    bx, number

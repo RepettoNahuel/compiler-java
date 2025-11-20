@@ -493,7 +493,7 @@ public class AsmCodeGenerator implements FileGenerator {
                             aux1 = sym1.getName().replace(".", "PUNTO");                        
                             aux1 = aux1.replace("-", "SUB");
 
-                            code.append("\tDisplayFloat " + aux1 + "\n"); 
+                            code.append("\tDisplayFloat " + aux1 + ",2 \n"); 
                             code.append("\tnewLine 1 \n\n");                    
                             break;
                     }
@@ -551,7 +551,7 @@ public class AsmCodeGenerator implements FileGenerator {
                     if (aux1.length() >= 2 && aux1.charAt(0) == '[' && aux1.charAt(aux1.length() - 1) == ']') {
                         
                         etiAux = mapaEtiAux.get(Integer.parseInt(aux1.substring(1, aux1.length() - 1)));
-                        if (etiAux != null) {  
+                        if (etiAux == null) {  
                             nroAux2++;
                             etiAux = "ETIQUETA" + nroAux2;
                             mapaEtiAux.put(Integer.parseInt(aux1.substring(1, aux1.length() - 1)), etiAux);  
