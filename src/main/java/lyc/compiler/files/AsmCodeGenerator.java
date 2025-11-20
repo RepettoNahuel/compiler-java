@@ -78,7 +78,7 @@ public class AsmCodeGenerator implements FileGenerator {
                 }
             }
         }
-
+        
         dataSection.append("\n\n");
         return dataSection.toString();
     }
@@ -484,7 +484,7 @@ public class AsmCodeGenerator implements FileGenerator {
                             aux1 = sym1.getName().replace(".", "PUNTO");                        
                             aux1 = aux1.replace("-", "SUB");
                         
-                            code.append("\tDisplayInteger " + aux1 + "\n");  
+                            code.append("\tDisplayFloat " + aux1 + ", 0\n");  
                             code.append("\tnewLine 1 \n\n");                      
                             break;
 

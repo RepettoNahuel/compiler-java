@@ -122,6 +122,7 @@ program ::= statements
                         System.out.println("Inicio del análisis");
                         SymbolTableGenerator.insertVariable("_true", "true", "Boolean");
                         SymbolTableGenerator.insertVariable("_false", "false", "Boolean");
+                        SymbolTableGenerator.insertVariable("-1", "-1", "Integer");
                     :};
 
 statements ::= /* vacío */ 
@@ -502,6 +503,20 @@ expression ::= expression:left PLUS term:right
 
                         Object temp_tr10 = IntermediateCodeGenerator.addTerceto("ASSIGN", "@areaMax", temp_tr9);
 
+                        Object temp_tr10_1 = IntermediateCodeGenerator.addTerceto("CMP", "@areaMax", "0");
+
+                        int salto_CERO = IntermediateCodeGenerator.getNextIndex() + 3;
+
+                        Object temp_tr10_2 = IntermediateCodeGenerator.addTerceto("BGT", "[" + salto_CERO + "]", "");
+
+                        Object temp_tr10_3 = IntermediateCodeGenerator.addTerceto("MULT", "@areaMax", "-1");
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
+                        Object temp_tr10_4 = IntermediateCodeGenerator.addTerceto("ASSIGN", "@areaMax", temp_tr10_3);
+
                         //Triangulo2
                         Map<String, Object> point21 = (Map<String, Object>) triangle2.get("p1");
                         Map<String, Object> point22 = (Map<String, Object>) triangle2.get("p2");
@@ -664,13 +679,33 @@ expression ::= expression:left PLUS term:right
 
                         areaAux = Math.abs(areaAux) / 2;
 
-                        Object temp_tr210 = IntermediateCodeGenerator.addTerceto("CMP", temp_tr29, temp_tr9);
+                        SymbolTableGenerator.insertVariable("@areaAux", String.valueOf(areaAux), "Float");
+
+                        Object temp_tr29_1 = IntermediateCodeGenerator.addTerceto("ASSIGN", "@areaAux", temp_tr29);
+
+                        ////                     
+                        Object temp_tr29_2 = IntermediateCodeGenerator.addTerceto("CMP", "@areaAux", "0");
+
+                        int salto_CERO2 = IntermediateCodeGenerator.getNextIndex() + 3;
+
+                        Object temp_tr29_3 = IntermediateCodeGenerator.addTerceto("BGT", "[" + salto_CERO2 + "]", "");
+
+                        Object temp_tr29_4 = IntermediateCodeGenerator.addTerceto("MULT", "@areaAux", "-1");
+
+                        nroAux++;                    
+                        varAux = "@aux" + nroAux; 
+                        SymbolTableGenerator.insertVariable(varAux, "", "Float");
+
+                        Object temp_tr29_5 = IntermediateCodeGenerator.addTerceto("ASSIGN", "@areaAux", temp_tr29_4);
+                        ///
+
+                        Object temp_tr210 = IntermediateCodeGenerator.addTerceto("CMP", "@areaAux", "@areaMax");
 
                         int salto = IntermediateCodeGenerator.getNextIndex() + 2;
 
                         Object temp_tr211 = IntermediateCodeGenerator.addTerceto("BLE", "[" + salto + "]", "");
 
-                        Object temp_tr212 = IntermediateCodeGenerator.addTerceto("ASSIGN", "@areaMax", temp_tr29);
+                        Object temp_tr212 = IntermediateCodeGenerator.addTerceto("ASSIGN", "@areaMax", "@areaAux");
 
                         if (areaAux > maximo){
                             maximo = areaAux;

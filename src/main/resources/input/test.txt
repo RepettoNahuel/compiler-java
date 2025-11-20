@@ -119,6 +119,12 @@ nn := 2
 nnn := 3.8
 areaMax := triangleAreaMaximum( [0,nnn; 4.0,12; 2.5,3] ; [nnn,0; 6,0; nn,2] )
 
+write("Valor de area maxima")
 write(areaMax)
+
+anios := 12
+
+write("Cuantos anios tiene Maira")
+write(anios)
 
 #+ Esto es un comentario +#
